@@ -1,0 +1,90 @@
+{
+  "care-band": {
+    "src": "/images/care-band-2000.webp",
+    "srcSet": "/images/care-band-1200.webp 1200w, /images/care-band-2000.webp 2000w",
+    "width": 2000,
+    "height": 857,
+    "color": "#b6b8b8",
+    "alt": "Nurses and physicians conferring in a bright hospital corridor"
+  },
+  "care-model": {
+    "src": "/images/care-model-960.webp",
+    "srcSet": "/images/care-model-560.webp 560w, /images/care-model-960.webp 960w",
+    "width": 960,
+    "height": 1200,
+    "color": "#7d6d5c",
+    "alt": "A physician listening to a seated patient during a consultation"
+  },
+  "patient-story": {
+    "src": "/images/patient-story-960.webp",
+    "srcSet": "/images/patient-story-560.webp 560w, /images/patient-story-960.webp 960w",
+    "width": 960,
+    "height": 720,
+    "color": "#acb5b8",
+    "alt": "A doctor smiling with a patient after a follow-up visit"
+  },
+  "campus": {
+    "src": "/images/campus-1040.webp",
+    "srcSet": "/images/campus-600.webp 600w, /images/campus-1040.webp 1040w",
+    "width": 1040,
+    "height": 693,
+    "color": "#827770",
+    "alt": "The main entrance of the Sunrise Hospitals campus"
+  },
+  "provider-cardio": {
+    "src": "/images/provider-cardio-700.webp",
+    "srcSet": "/images/provider-cardio-380.webp 380w, /images/provider-cardio-700.webp 700w",
+    "width": 700,
+    "height": 700,
+    "color": "#928fb0",
+    "alt": "Portrait of a cardiologist in a white coat"
+  },
+  "provider-peds": {
+    "src": "/images/provider-peds-700.webp",
+    "srcSet": "/images/provider-peds-380.webp 380w, /images/provider-peds-700.webp 700w",
+    "width": 700,
+    "height": 700,
+    "color": "#a5a87f",
+    "alt": "Portrait of a paediatrician smiling"
+  },
+  "provider-ortho": {
+    "src": "/images/provider-ortho-700.webp",
+    "srcSet": "/images/provider-ortho-380.webp 380w, /images/provider-ortho-700.webp 700w",
+    "width": 700,
+    "height": 700,
+    "color": "#c3c6cd",
+    "alt": "Portrait of an orthopaedic surgeon"
+  },
+  "provider-neuro": {
+    "src": "/images/provider-neuro-700.webp",
+    "srcSet": "/images/provider-neuro-380.webp 380w, /images/provider-neuro-700.webp 700w",
+    "width": 700,
+    "height": 700,
+    "color": "#a09c8c",
+    "alt": "Portrait of a neurologist in a consulting room"
+  },
+  "article-emergency": {
+    "src": "/images/article-emergency-880.webp",
+    "srcSet": "/images/article-emergency-500.webp 500w, /images/article-emergency-880.webp 880w",
+    "width": 880,
+    "height": 587,
+    "color": "#7288a2",
+    "alt": "An emergency response team moving through an ambulance bay"
+  },
+  "article-recovery": {
+    "src": "/images/article-recovery-880.webp",
+    "srcSet": "/images/article-recovery-500.webp 500w, /images/article-recovery-880.webp 880w",
+    "width": 880,
+    "height": 587,
+    "color": "#9e8f79",
+    "alt": "A clinician reviewing recovery notes with a patient"
+  },
+  "article-team": {
+    "src": "/images/article-team-880.webp",
+    "srcSet": "/images/article-team-500.webp 500w, /images/article-team-880.webp 880w",
+    "width": 880,
+    "height": 587,
+    "color": "#a6998d",
+    "alt": "Members of the care team meeting at a nurses station"
+  }
+}

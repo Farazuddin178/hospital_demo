@@ -1,0 +1,239 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  /* RGB triplets (no commas) so Tailwind's rgb(var(--x) / <alpha-value>) syntax works. */
+  --color-surface: 255 255 255; /* pure white canvas */
+  --color-surface-alt: 248 247 244; /* warm paper — the alternating band */
+  --color-ink: 19 30 39; /* ~15.8:1 on white */
+  --color-ink-muted: 90 104 114; /* ~5.4:1 on white */
+  --hairline: 226 230 233;
+}
+
+.dark {
+  --color-surface: 13 20 26;
+  --color-surface-alt: 18 27 34;
+  --color-ink: 232 236 239;
+  --color-ink-muted: 156 170 180;
+  --hairline: 40 55 66;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  color: rgb(var(--color-ink));
+  background: rgb(var(--color-surface));
+  /* Slightly open tracking keeps large white areas from feeling cramped. */
+  -webkit-font-smoothing: antialiased;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+@layer base {
+  h1,
+  h2,
+  h3,
+  h4 {
+    @apply font-display font-semibold tracking-tight text-ink;
+  }
+
+  h1 {
+    @apply tracking-tightest;
+  }
+
+  /* Visible focus ring everywhere for keyboard users (a11y requirement). */
+  a:focus-visible,
+  button:focus-visible,
+  input:focus-visible,
+  textarea:focus-visible,
+  select:focus-visible,
+  summary:focus-visible,
+  [tabindex]:focus-visible {
+    outline: 2px solid theme("colors.brand.600");
+    outline-offset: 3px;
+    border-radius: 4px;
+  }
+
+  ::selection {
+    background-color: theme("colors.brand.100");
+    color: theme("colors.brand.900");
+  }
+
+  ::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    background-color: theme("colors.brand.200");
+    border-radius: 9999px;
+    border: 3px solid rgb(var(--color-surface));
+  }
+
+  /* Native marker removed globally: every <summary> here is a styled control. */
+  summary::-webkit-details-marker {
+    display: none;
+  }
+  summary {
+    list-style: none;
+  }
+}
+
+@layer components {
+  /* ---- Surfaces ------------------------------------------------------- */
+
+  /* Depth comes from a hairline border, not a drop shadow. */
+  .card {
+    @apply rounded-2xl border border-[rgb(var(--hairline))] bg-white p-6 transition duration-300 ease-calm dark:bg-white/[0.03];
+  }
+  .card-hover {
+    @apply hover:border-brand-300 hover:shadow-soft;
+  }
+
+  .hairline {
+    @apply border-[rgb(var(--hairline))];
+  }
+
+  /* ---- Actions -------------------------------------------------------- */
+
+  /* The single primary action, used site-wide: solid clinical blue pill.
+     White on brand-700 measures 8.2:1 — well past AA at any size. */
+  .btn-primary {
+    @apply inline-flex items-center justify-center gap-2 rounded-full bg-brand-700 px-7 py-3.5 font-semibold text-white shadow-soft transition duration-300 ease-calm hover:bg-brand-800 hover:shadow-card active:bg-brand-900 disabled:pointer-events-none disabled:opacity-60 dark:bg-brand-600 dark:hover:bg-brand-500;
+  }
+  .btn-secondary {
+    @apply inline-flex items-center justify-center gap-2 rounded-full border border-[rgb(var(--hairline))] bg-white px-7 py-3.5 font-semibold text-ink transition duration-300 ease-calm hover:border-brand-400 hover:bg-brand-50 hover:text-brand-700 dark:bg-transparent dark:text-ink dark:hover:bg-white/5;
+  }
+  /* Warm variant — reserved for secondary, human-facing asks (tours, stories). */
+  .btn-warm {
+    @apply inline-flex items-center justify-center gap-2 rounded-full bg-accent-600 px-7 py-3.5 font-semibold text-white shadow-soft transition duration-300 ease-calm hover:bg-accent-700;
+  }
+  .btn-ghost-inverse {
+    @apply inline-flex items-center justify-center gap-2 rounded-full border border-white/35 px-7 py-3.5 font-semibold text-white transition duration-300 ease-calm hover:border-white/70 hover:bg-white/10;
+  }
+
+  /* ---- Links ---------------------------------------------------------- */
+
+  /* Underline is present at rest (never hover-only) so links are discoverable
+     without a pointer; hover just thickens the ink. */
+  .link-underline {
+    @apply relative font-medium text-ink transition-colors duration-200 hover:text-brand-700 after:absolute after:-bottom-1.5 after:left-0 after:h-px after:w-full after:scale-x-0 after:bg-brand-600 after:transition-transform after:duration-300 after:ease-calm hover:after:scale-x-100;
+  }
+
+  .link-quiet {
+    @apply text-ink-muted underline decoration-[rgb(var(--hairline))] decoration-1 underline-offset-4 transition-colors hover:text-brand-700 hover:decoration-brand-400;
+  }
+
+  /* Text link with a trailing arrow that nudges on hover. */
+  .link-arrow {
+    @apply inline-flex items-center gap-1.5 font-semibold text-brand-700 transition-colors hover:text-brand-800;
+  }
+  .link-arrow svg {
+    @apply transition-transform duration-300 ease-calm;
+  }
+  .link-arrow:hover svg {
+    transform: translateX(3px);
+  }
+
+  /* ---- Typography helpers --------------------------------------------- */
+
+  /* Section label: a small clay rule + uppercase micro-type. No pill, no fill. */
+  .eyebrow {
+    @apply inline-flex items-center gap-2.5 text-[0.6875rem] font-semibold uppercase tracking-[0.16em] text-accent-600 dark:text-accent-300;
+  }
+  .eyebrow::before {
+    content: "";
+    @apply h-px w-6 bg-accent-400;
+  }
+
+  .section-title {
+    @apply mt-5 font-display text-3xl leading-[1.15] text-ink sm:text-4xl lg:text-[2.75rem];
+  }
+
+  .section-lede {
+    @apply mt-4 max-w-prose text-lg leading-relaxed text-ink-muted;
+  }
+
+  /* ---- Forms ---------------------------------------------------------- */
+
+  .form-input {
+    @apply w-full rounded-xl border border-[rgb(var(--hairline))] bg-white px-4 py-3 text-ink transition duration-200 placeholder:text-slate-400 focus:border-brand-500 focus:outline-none focus:ring-4 focus:ring-brand-500/15 dark:bg-white/5;
+  }
+
+  .divider-gradient {
+    @apply h-px w-full border-0 bg-[rgb(var(--hairline))];
+  }
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+  .text-pretty {
+    text-wrap: pretty;
+  }
+
+  /* Kept for compatibility; now a flat ink treatment rather than a gradient. */
+  .text-gradient {
+    @apply text-brand-700 dark:text-brand-300;
+  }
+
+  /* Calm hero wash: two very low-opacity radials over warm paper.
+     No image request, so the hero paints on the first frame. */
+  .bg-hero-gradient {
+    background:
+      radial-gradient(62% 78% at 12% 0%, rgb(199 219 232 / 0.55), transparent 62%),
+      radial-gradient(52% 64% at 92% 6%, rgb(243 234 225 / 0.85), transparent 58%),
+      linear-gradient(180deg, #f8f7f4 0%, #ffffff 100%);
+  }
+  .dark .bg-hero-gradient {
+    background:
+      radial-gradient(62% 78% at 12% 0%, rgb(40 83 111 / 0.45), transparent 62%),
+      radial-gradient(52% 64% at 92% 6%, rgb(111 76 56 / 0.28), transparent 58%),
+      linear-gradient(180deg, #101a22 0%, #0d141a 100%);
+  }
+
+  /* Inverted band used for the closing CTA and the footer. */
+  .bg-ink-band {
+    background: linear-gradient(160deg, #1d3f55 0%, #142c3c 62%, #11242f 100%);
+  }
+
+  /* Skips layout + paint for off-screen sections. The intrinsic size keeps the
+     scrollbar honest so nothing jumps as you scroll. */
+  .defer-paint {
+    content-visibility: auto;
+    contain-intrinsic-size: auto 640px;
+  }
+}
+
+/* Skip-to-content link: hidden until focused, aids keyboard/screen-reader users. */
+.skip-link {
+  position: absolute;
+  left: -9999px;
+  top: 0;
+  z-index: 100;
+  background: #28536f;
+  color: #ffffff;
+  padding: 0.75rem 1.25rem;
+  font-weight: 600;
+  border-radius: 0 0 0.5rem 0;
+}
+.skip-link:focus {
+  left: 0;
+}
