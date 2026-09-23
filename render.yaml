@@ -1,0 +1,28 @@
+services:
+  - type: web
+    name: sunrise-hospitals
+    runtime: node
+    plan: free
+    region: singapore
+    branch: main
+    buildCommand: npm ci && npm run build
+    startCommand: npm run start -- -p $PORT
+    healthCheckPath: /
+    envVars:
+      - key: NODE_VERSION
+        value: 18.20.0
+      # Contact and appointment forms (src/app/api/*) read these. Safe to leave
+      # unset for now — submissions are logged instead of emailed until they're set.
+      - key: SMTP_HOST
+        sync: false
+      - key: SMTP_USER
+        sync: false
+      - key: SMTP_PASS
+        sync: false
+      - key: CONTACT_TO_EMAIL
+        sync: false
+      - key: APPOINTMENTS_TO_EMAIL
+        sync: false
+      # Optional: leave blank to skip analytics.
+      - key: NEXT_PUBLIC_GA_ID
+        sync: false
