@@ -67,6 +67,10 @@ export const viewport = {
     { media: "(prefers-color-scheme: light)", color: "#ffffff" },
     { media: "(prefers-color-scheme: dark)", color: "#0d141a" },
   ],
+  // Lets content draw under the notch/home-indicator on iOS so the
+  // env(safe-area-inset-*) values CookieConsent relies on actually resolve to
+  // something other than 0.
+  viewportFit: "cover",
 };
 
 const organizationJsonLd = {

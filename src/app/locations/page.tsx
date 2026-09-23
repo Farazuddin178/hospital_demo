@@ -8,7 +8,7 @@ import { emergency, locations } from "@/lib/home-content";
 export const metadata: Metadata = {
   title: "Locations",
   description:
-    "Four Sunrise Hospitals campuses across Hyderabad, with addresses, opening hours, emergency cover, live wait times, parking, and directions.",
+    "Four Oxygen Hospital campuses across Hyderabad, with addresses, opening hours, emergency cover, live wait times, parking, and directions.",
   alternates: { canonical: "/locations" },
 };
 

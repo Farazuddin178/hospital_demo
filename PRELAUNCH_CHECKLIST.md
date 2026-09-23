@@ -20,7 +20,7 @@ Stack: Next.js 14 (App Router) + TypeScript + Tailwind CSS. Run `npm install` th
 
 ## SEO & Discoverability
 
-**7. Meta titles/descriptions for all pages** — Root template in [src/app/layout.tsx](src/app/layout.tsx) (`%s | Sunrise Hospitals`); every page exports its own `metadata` (see [src/app/about/page.tsx](src/app/about/page.tsx), [src/app/specialties/[slug]/page.tsx](src/app/specialties/%5Bslug%5D/page.tsx) which generates unique metadata per specialty via `generateMetadata`).
+**7. Meta titles/descriptions for all pages** — Root template in [src/app/layout.tsx](src/app/layout.tsx) (`%s | Oxygen Hospital`); every page exports its own `metadata` (see [src/app/about/page.tsx](src/app/about/page.tsx), [src/app/specialties/[slug]/page.tsx](src/app/specialties/%5Bslug%5D/page.tsx) which generates unique metadata per specialty via `generateMetadata`).
 
 **8. Social preview image** — [src/app/opengraph-image.tsx](src/app/opengraph-image.tsx) generates a 1200×630 OG image automatically at `/opengraph-image` for every route (no manual image asset needed); Twitter card type is set to `summary_large_image` in layout metadata.
 

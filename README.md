@@ -1,4 +1,4 @@
-# Sunrise Hospitals
+# Oxygen Hospital
 
 A Next.js 14 (App Router) marketing site for a multi-specialty hospital group, built
 around a "calm clinical" design language: pure white, warm paper greys, one muted
@@ -58,8 +58,8 @@ src/
     locations/page.tsx    "Locations" mega-menu destination
     specialties/          "Conditions & Treatments" destinations
   components/
-    Header.tsx            mega-menu navigation (zero-JS, see below)
-    HeroSearch.tsx        the only new client component
+    Header.tsx            mega-menu navigation (client component, see below)
+    HeroSearch.tsx        hero search (client component)
     Photo.tsx             self-hosted responsive photography
     Footer.tsx
   lib/
@@ -71,11 +71,25 @@ src/
 
 ### Navigation
 
-The three mega menus are native `<details>`/`<summary>` elements. That gives correct
-keyboard and screen-reader behaviour for free, renders entirely on the server, and
-works before hydration. Roughly 700 bytes of inline script add only what HTML has no
-opinion about: Escape to close, outside clicks, and closing after a client-side
-navigation.
+The three mega menus were originally native `<details>`/`<summary>` elements, chosen
+for zero-JS server-rendered menus. Real-device testing killed that approach: a touch
+tap on `<summary>` fires a normal click event *without* the browser running its
+native "toggle the details" activation, and separately, this app's React tree would
+revert any `open` attribute set from outside it. Both are the same root problem —
+nothing outside React can safely own DOM state that lives inside a hydrated React
+tree. On a site whose visitors are mostly on phones, a menu that ignores taps is
+disqualifying.
+
+So `Header.tsx` is a client component and the open/closed state is ordinary React
+state. Panels are conditionally rendered, so a closed menu is absent from the DOM
+entirely rather than merely hidden. Escape (with focus return to the trigger),
+outside-click dismissal, and closing on navigation are implemented explicitly, since
+they no longer come free with `<details>`.
+
+One layout constraint worth knowing: the panels use `inset-x-0` to span the full
+viewport width, so their wrappers must **not** be `relative`. The containing block
+has to stay the sticky `<header>`, or the panel collapses to the width of its
+trigger button.
 
 Menu column labels are `<p>` elements, not headings. The nav sits above the page's
 `<h1>` in the DOM, so real headings there would put a dozen entries ahead of it in
@@ -86,7 +100,7 @@ Renaming a section id without updating the menu leaves a dead link.
 
 ### Hero search
 
-`HeroSearch.tsx` is the only component that ships JavaScript. The index is built on
+`HeroSearch.tsx` ships the search JavaScript. The index is built on
 the server by `buildSearchIndex()` and passed down as a plain-data prop, so the
 icon-laden content modules never reach the client bundle. Matching is synchronous
 over ~69 in-memory entries, so there is nothing to debounce and no request to wait on.

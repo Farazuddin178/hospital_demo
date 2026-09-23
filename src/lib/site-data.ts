@@ -26,13 +26,13 @@ import {
 } from "lucide-react";
 
 export const siteConfig = {
-  name: "Sunrise Hospitals",
+  name: "Oxygen Hospital",
   tagline: "Your Health, Our Priority",
-  url: "https://www.sunrisehospitals.example",
+  url: "https://www.oxygenhospital.example",
   phonePrimary: "+91 9100-100812",
   phoneSecondary: "+91 9100-500812",
-  emailAdmin: "admin@sunrisehospitals.example",
-  emailSupport: "patient-support@sunrisehospitals.example",
+  emailAdmin: "admin@oxygenhospital.example",
+  emailSupport: "patient-support@oxygenhospital.example",
   address: "8-4-120/4, Example Road, Hyderabad, Telangana, IN",
   hours: "Open 24/7 · All Week Days",
   social: {

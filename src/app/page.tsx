@@ -114,7 +114,7 @@ export default function HomePage() {
       </section>
 
       {/* ================= Stats ============================================= */}
-      <section aria-label="Sunrise Hospitals at a glance" className="bg-surface py-20 lg:py-24">
+      <section aria-label="Oxygen Hospital at a glance" className="bg-surface py-20 lg:py-24">
         <div className="mx-auto max-w-7xl px-6 lg:px-8">
           <dl className="grid gap-y-10 sm:grid-cols-2 lg:grid-cols-4 lg:gap-x-10">
             {stats.map((stat, i) => (

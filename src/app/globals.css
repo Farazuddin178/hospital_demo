@@ -21,11 +21,19 @@
 
 html {
   scroll-behavior: smooth;
+  /* Belt-and-braces against page-wide horizontal scroll on phones: nothing on
+     this site should legitimately be wider than the viewport, so if something
+     ever overflows, clip it instead of letting the whole page pan sideways
+     and force a pinch-zoom to reach content on the far edge. */
+  overflow-x: hidden;
 }
 
 body {
   color: rgb(var(--color-ink));
   background: rgb(var(--color-surface));
+  /* Not repeated here: overflow-x on both html AND body turns body into its
+     own scroll container in some browsers, which can detach the header's
+     `position: sticky` from the real viewport. html alone is enough. */
   /* Slightly open tracking keeps large white areas from feeling cramped. */
   -webkit-font-smoothing: antialiased;
 }

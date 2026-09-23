@@ -38,7 +38,7 @@ export default function Footer() {
       {/* Emergency line stays visible at the end of every page. */}
       <div className="border-b border-white/10">
         <div className="mx-auto flex max-w-7xl flex-col gap-3 px-6 py-5 sm:flex-row sm:items-center sm:justify-between lg:px-8">
-          <p className="flex items-center gap-2.5 text-sm">
+          <p className="flex flex-wrap items-center gap-x-2.5 gap-y-1 text-sm">
             <span className="relative flex h-2 w-2" aria-hidden="true">
               <span className="absolute inline-flex h-full w-full rounded-full bg-accent-400 opacity-60" />
               <span className="relative inline-flex h-2 w-2 rounded-full bg-accent-300" />
@@ -74,19 +74,19 @@ export default function Footer() {
           </p>
 
           <div className="mt-6 flex gap-3">
-            <Social href={siteConfig.social.facebook} label="Sunrise Hospitals on Facebook">
+            <Social href={siteConfig.social.facebook} label="Oxygen Hospital on Facebook">
               <svg viewBox="0 0 24 24" className="h-4 w-4 fill-current" aria-hidden="true">
                 <path d="M13.5 21v-7.5h2.5l.5-3H13.5V8.5c0-.9.25-1.5 1.53-1.5H16.5V4.3c-.27-.04-1.2-.11-2.28-.11-2.26 0-3.8 1.38-3.8 3.9V10.5H8v3h2.42V21h3.08Z" />
               </svg>
             </Social>
-            <Social href={siteConfig.social.instagram} label="Sunrise Hospitals on Instagram">
+            <Social href={siteConfig.social.instagram} label="Oxygen Hospital on Instagram">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="h-4 w-4" aria-hidden="true">
                 <rect x="3.5" y="3.5" width="17" height="17" rx="4.5" />
                 <circle cx="12" cy="12" r="4" />
                 <circle cx="17" cy="7" r="0.8" fill="currentColor" stroke="none" />
               </svg>
             </Social>
-            <Social href={siteConfig.social.youtube} label="Sunrise Hospitals on YouTube">
+            <Social href={siteConfig.social.youtube} label="Oxygen Hospital on YouTube">
               <svg viewBox="0 0 24 24" className="h-4 w-4 fill-current" aria-hidden="true">
                 <path d="M21.6 7.2a2.5 2.5 0 0 0-1.76-1.77C18.25 5 12 5 12 5s-6.25 0-7.84.43A2.5 2.5 0 0 0 2.4 7.2 26.2 26.2 0 0 0 2 12a26.2 26.2 0 0 0 .4 4.8 2.5 2.5 0 0 0 1.76 1.77C5.75 19 12 19 12 19s6.25 0 7.84-.43a2.5 2.5 0 0 0 1.76-1.77A26.2 26.2 0 0 0 22 12a26.2 26.2 0 0 0-.4-4.8ZM10 15V9l5.2 3Z" />
               </svg>

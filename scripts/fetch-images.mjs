@@ -9,7 +9,7 @@ const SET = [
   ["care-band",         "1519494026892-80bbd2d6fd0d", 21/9, [1200, 2000], "Nurses and physicians conferring in a bright hospital corridor"],
   ["care-model",        "1576091160550-2173dba999ef", 4/5,  [560, 960],   "A physician listening to a seated patient during a consultation"],
   ["patient-story",     "1594824476967-48c8b964273f", 4/3,  [560, 960],   "A doctor smiling with a patient after a follow-up visit"],
-  ["campus",            "1584515933487-779824d29309", 3/2,  [600, 1040],  "The main entrance of the Sunrise Hospitals campus"],
+  ["campus",            "1584515933487-779824d29309", 3/2,  [600, 1040],  "The main entrance of the Oxygen Hospital campus"],
   ["provider-cardio",   "1622253692010-333f2da6031d", 1,    [380, 700],   "Portrait of a cardiologist in a white coat"],
   ["provider-peds",     "1559839734-2b71ea197ec2",    1,    [380, 700],   "Portrait of a paediatrician smiling"],
   ["provider-ortho",    "1612349317150-e413f6a5b16d", 1,    [380, 700],   "Portrait of an orthopaedic surgeon"],

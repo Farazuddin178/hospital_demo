@@ -9,7 +9,7 @@ import { acceptedInsurers, emergency } from "@/lib/home-content";
 export const metadata: Metadata = {
   title: "Patients & Visitors",
   description:
-    "What to bring, visiting hours, accessibility support, insurance and billing, medical records, and patient rights at Sunrise Hospitals.",
+    "What to bring, visiting hours, accessibility support, insurance and billing, medical records, and patient rights at Oxygen Hospital.",
   alternates: { canonical: "/patients" },
 };
 

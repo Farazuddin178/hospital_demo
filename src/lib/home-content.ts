@@ -60,7 +60,7 @@ export type Location = {
 export const locations: Location[] = [
   {
     slug: "banjara-hills",
-    name: "Sunrise Main Campus",
+    name: "Oxygen Main Campus",
     area: "Banjara Hills",
     address: "8-4-120/4, Example Road, Banjara Hills, Hyderabad 500034",
     phone: "+91 9100-100812",
@@ -72,7 +72,7 @@ export const locations: Location[] = [
   },
   {
     slug: "gachibowli",
-    name: "Sunrise Gachibowli",
+    name: "Oxygen Gachibowli",
     area: "Gachibowli",
     address: "Plot 41, Financial District Road, Gachibowli, Hyderabad 500032",
     phone: "+91 9100-500812",
@@ -84,7 +84,7 @@ export const locations: Location[] = [
   },
   {
     slug: "secunderabad",
-    name: "Sunrise Secunderabad",
+    name: "Oxygen Secunderabad",
     area: "Secunderabad",
     address: "12-A, Sarojini Devi Road, Secunderabad, Hyderabad 500003",
     phone: "+91 9100-500813",
@@ -96,7 +96,7 @@ export const locations: Location[] = [
   },
   {
     slug: "kukatpally",
-    name: "Sunrise Kukatpally Clinic",
+    name: "Oxygen Kukatpally Clinic",
     area: "Kukatpally",
     address: "Road No. 4, KPHB Colony, Kukatpally, Hyderabad 500072",
     phone: "+91 9100-500814",

@@ -1,6 +1,6 @@
 services:
   - type: web
-    name: sunrise-hospitals
+    name: oxygen-hospital
     runtime: node
     plan: free
     region: singapore

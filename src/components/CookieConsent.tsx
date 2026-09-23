@@ -26,23 +26,28 @@ export default function CookieConsent() {
       role="dialog"
       aria-live="polite"
       aria-label="Cookie consent"
-      className="fixed inset-x-4 bottom-4 z-[100] mx-auto max-w-4xl rounded-2xl border border-slate-200/70 bg-white/95 p-5 shadow-card backdrop-blur dark:border-slate-700/60 dark:bg-slate-800/95"
+      // inset-x-3 (not -4) plus a capped max width keeps this clear of the
+      // screen edges on the narrowest phones. The bottom offset adds the
+      // device's safe-area inset on top of the base gap, so the buttons never
+      // sit under an iPhone's home-indicator bar or an Android gesture pill.
+      className="fixed inset-x-3 z-[60] mx-auto max-w-4xl rounded-2xl border border-[rgb(var(--hairline))] bg-surface/95 p-5 shadow-lift backdrop-blur sm:inset-x-4"
+      style={{ bottom: "max(0.75rem, env(safe-area-inset-bottom))" }}
     >
       <div className="flex flex-col items-start gap-4 sm:flex-row sm:items-center sm:justify-between">
         <p className="text-sm text-ink-muted">
           We use cookies to analyze site traffic and improve your experience. Read our{" "}
           <a href="/privacy-policy" className="font-medium text-brand-700 underline-offset-2 hover:underline dark:text-brand-300">Privacy Policy</a>.
         </p>
-        <div className="flex shrink-0 gap-3">
+        <div className="flex w-full shrink-0 gap-3 sm:w-auto">
           <button
             onClick={() => choose("denied")}
-            className="btn-secondary !px-4 !py-2 text-sm"
+            className="btn-secondary flex-1 !px-4 !py-2 text-sm sm:flex-none"
           >
             Decline
           </button>
           <button
             onClick={() => choose("granted")}
-            className="btn-primary !px-4 !py-2 text-sm"
+            className="btn-primary flex-1 !px-4 !py-2 text-sm sm:flex-none"
           >
             Accept
           </button>
