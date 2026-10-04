@@ -183,7 +183,9 @@ One codebase, two builds:
 Server-only code stays in the repo for later: `src/middleware.server.ts` and
 `src/app/api/**/route.server.ts`. Only the server build includes `.server.ts` files
 (see `pageExtensions` in `next.config.mjs`), so the static build skips them.
-`public/.htaccess` handles HTTPS, security headers, caching and the 404 page on Apache.
+`public/.htaccess` handles security headers, caching and the 404 page on Apache. The
+HTTP-to-HTTPS redirect is cPanel's "Force HTTPS Redirect" switch (Domains), turned on
+after AutoSSL has issued the certificate.
 
 ### Forms on the static build
 
@@ -198,8 +200,9 @@ routes take). The forms then post there instead.
 `.github/workflows/deploy-godaddy.yml` runs on every push to `main`. It builds the
 static site and uploads `out/` over FTP. Until the FTP secrets are set it only builds.
 
-1. In cPanel, turn on SSL for the domain (SSL/TLS Status) and create an FTP account
-   (FTP Accounts) with access to `public_html`.
+1. Point the domain at the hosting, then in cPanel open SSL/TLS Status and click
+   Run AutoSSL. When the domain shows a valid certificate, turn on Force HTTPS Redirect
+   under Domains. Create an FTP account (FTP Accounts) with access to `public_html`.
 2. In GitHub: Settings > Secrets and variables > Actions. Add the secrets `FTP_SERVER`,
    `FTP_USERNAME` and `FTP_PASSWORD`. Add the variable `SITE_URL`, for example
    `https://www.yourdomain.com`.

@@ -18,11 +18,14 @@ AddType image/x-icon .ico
 <IfModule mod_rewrite.c>
   RewriteEngine On
 
-  # HTTPS only. Turn on the free SSL certificate in cPanel (SSL/TLS Status)
-  # before uploading, or visitors will see a certificate warning.
-  RewriteCond %{HTTPS} !=on
-  RewriteCond %{HTTP:X-Forwarded-Proto} !=https
-  RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+  # No HTTP-to-HTTPS redirect here on purpose. Redirecting before a valid
+  # certificate exists shows visitors a security warning, and can block
+  # AutoSSL's domain check, which must reach /.well-known/ over plain HTTP.
+  # Once AutoSSL has issued the certificate, turn on "Force HTTPS Redirect"
+  # in cPanel > Domains; cPanel exempts /.well-known/ by itself.
+
+  # Never rewrite AutoSSL's validation files.
+  RewriteRule ^\.well-known/ - [L]
 
   # Old URL kept working.
   RewriteRule ^appointment/?$ /book-appointment/ [L,R=301]
