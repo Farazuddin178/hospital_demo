@@ -1,6 +1,5 @@
 import { Phone } from "lucide-react";
 import { siteConfig } from "@/lib/site-data";
-import { locations } from "@/lib/home-content";
 
 const tel = (value: string) => `tel:${value.replace(/[\s-]/g, "")}`;
 
@@ -11,7 +10,7 @@ const tel = (value: string) => `tel:${value.replace(/[\s-]/g, "")}`;
  * the hospital's ambulance when one is available.
  *
  * Only claims the hospital has made are used: a 24/7 emergency line and the
- * two branch numbers. No response times or vehicle types until confirmed.
+ * ambulance mobile number (the hospital asked for no landline here). No response times or vehicle types until confirmed.
  */
 export default function AmbulanceBanner() {
   return (
@@ -26,26 +25,20 @@ export default function AmbulanceBanner() {
             24/7 Emergency and Ambulance Service in Hyderabad
           </h2>
           <p className="mt-5 max-w-xl text-lg leading-relaxed text-brand-100">
-            Call the branch nearest you. Our team will guide you over the phone and send help
-            on the way.
+            Call our ambulance line. Our team will guide you over the phone and send help on the
+            way.
           </p>
 
-          <ul className="mt-8 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
-            {locations.map((location) => (
-              <li key={location.slug}>
-                <a
-                  href={tel(location.phone)}
-                  className="inline-flex w-full items-center justify-center gap-3 rounded-full bg-white px-6 py-3.5 text-brand-900 shadow-soft transition duration-300 ease-calm hover:bg-brand-50 active:scale-[0.98] sm:w-auto"
-                >
-                  <Phone className="h-5 w-5 text-[#c2410c]" strokeWidth={2} aria-hidden="true" />
-                  <span className="text-left leading-tight">
-                    <span className="block text-xs font-medium text-ink-muted">{location.area}</span>
-                    <span className="block font-semibold">{location.phone}</span>
-                  </span>
-                </a>
-              </li>
-            ))}
-          </ul>
+          <a
+            href={tel(siteConfig.ambulancePhone)}
+            className="mt-8 inline-flex w-full items-center justify-center gap-3 rounded-full bg-white px-7 py-3.5 text-brand-900 shadow-soft transition duration-300 ease-calm hover:bg-brand-50 active:scale-[0.98] sm:w-auto"
+          >
+            <Phone className="h-5 w-5 text-[#c2410c]" strokeWidth={2} aria-hidden="true" />
+            <span className="text-left leading-tight">
+              <span className="block text-xs font-medium text-ink-muted">Call ambulance</span>
+              <span className="block text-lg font-semibold">{siteConfig.ambulancePhone}</span>
+            </span>
+          </a>
         </div>
 
         <div className="lg:col-span-6">
@@ -122,7 +115,7 @@ function AmbulanceIllustration() {
 
         {/* Emergency number on the side, below the stripe */}
         <text x="232" y="257" fill={ink} fontFamily="Inter, system-ui, sans-serif" fontSize="14" fontWeight="700">
-          {`24/7  ${siteConfig.phonePrimary}`}
+          {`24/7  ${siteConfig.ambulancePhone}`}
         </text>
       </g>
 

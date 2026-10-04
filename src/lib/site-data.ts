@@ -41,6 +41,8 @@ export const siteConfig = {
   // The hospital asked for the Falaknuma mobile on the booking and patient pages.
   // Online requests also go to this number on WhatsApp until a backend exists.
   appointmentsPhone: "+91 97001 73631",
+  // Ambulance banner on the homepage: mobile only, no landline (hospital request).
+  ambulancePhone: "+91 97001 73631",
   // Shown under the phone numbers, and where the website forms are delivered
   // (public/api/*.php on the static build).
   email: "info@oxygen-hospital.com",
