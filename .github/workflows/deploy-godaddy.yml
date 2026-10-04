@@ -7,7 +7,10 @@
 #              FTP_USERNAME
 #              FTP_PASSWORD
 #   Variables: SITE_URL       e.g. https://www.yourdomain.com (optional)
-#              FTP_SERVER_DIR defaults to /public_html/
+#              FTP_SERVER_DIR folder to upload into (optional). Normally leave
+#                             unset: the upload finds public_html by itself,
+#                             whether the FTP login opens in the home folder
+#                             or already inside public_html.
 #              FTP_PROTOCOL   ftps (default) or ftp if FTPS is refused
 #              GA_ID          Google Analytics ID (optional)
 #              API_URL        a backend for the forms, once one exists (optional)
@@ -29,9 +32,9 @@ jobs:
     env:
       FTP_CONFIGURED: ${{ secrets.FTP_SERVER != '' }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v5
         with:
           node-version: 18
           cache: npm
@@ -45,16 +48,41 @@ jobs:
           NEXT_PUBLIC_GA_ID: ${{ vars.GA_ID }}
           NEXT_PUBLIC_API_URL: ${{ vars.API_URL }}
 
+      # lftp's mirror creates each folder as it goes and logs every file, so a
+      # failure names the exact path. Nothing on the server is deleted, which
+      # keeps cPanel's own files (.well-known for SSL renewal, cgi-bin) safe.
       - name: Upload to GoDaddy
         if: env.FTP_CONFIGURED == 'true'
-        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
-        with:
-          server: ${{ secrets.FTP_SERVER }}
-          username: ${{ secrets.FTP_USERNAME }}
-          password: ${{ secrets.FTP_PASSWORD }}
-          protocol: ${{ vars.FTP_PROTOCOL || 'ftps' }}
-          local-dir: ./out/
-          server-dir: ${{ vars.FTP_SERVER_DIR || '/public_html/' }}
+        env:
+          FTP_SERVER: ${{ secrets.FTP_SERVER }}
+          FTP_USERNAME: ${{ secrets.FTP_USERNAME }}
+          LFTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
+          FTP_PROTOCOL: ${{ vars.FTP_PROTOCOL || 'ftps' }}
+          FTP_SERVER_DIR: ${{ vars.FTP_SERVER_DIR }}
+        run: |
+          sudo apt-get install -y -qq lftp > /dev/null
+
+          if [ "$FTP_PROTOCOL" = "ftp" ]; then SSL=no; else SSL=yes; fi
+          # GoDaddy's FTP certificate is issued to the server's own hostname,
+          # not ftp.yourdomain.com, so it cannot pass a name check. The
+          # connection is still encrypted.
+          SETTINGS="set ftp:ssl-allow $SSL; set ftp:ssl-force $SSL; set ftp:ssl-protect-data $SSL; set ssl:verify-certificate no; set net:max-retries 3; set net:timeout 30; set net:reconnect-interval-base 5"
+          SERVER="${FTP_SERVER#ftp://}"
+          SERVER="${SERVER%/}"
+          # -c exits with the status of the last command, so a failed cd or
+          # upload fails the step. The password comes from LFTP_PASSWORD.
+          ftp_run() { lftp -c "$SETTINGS; open --env-password -u '$FTP_USERNAME' 'ftp://$SERVER'; $1"; }
+
+          if [ -n "$FTP_SERVER_DIR" ]; then
+            TARGET="$FTP_SERVER_DIR"
+          elif ftp_run "cd public_html" > /dev/null 2>&1; then
+            TARGET="public_html"   # login opens in the account's home folder
+          else
+            TARGET="."             # login already opens inside public_html
+          fi
+          echo "Uploading ./out to '$TARGET'"
+
+          ftp_run "mirror --reverse --verbose --no-perms --parallel=4 out/ '$TARGET'"
 
       - name: Upload skipped
         if: env.FTP_CONFIGURED != 'true'
