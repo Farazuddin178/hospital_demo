@@ -5,13 +5,24 @@
  * direct requests to it. Submissions never pass through a third-party form
  * service.
  *
- * Sending: PHP's mail() is refused on this GoDaddy hosting plan, so the mailer
- * signs in to the hospital's own mailbox (GoDaddy Professional Email) over
- * SMTP, the way an email app does. The sign-in details live in a settings file
- * OUTSIDE public_html, created once in cPanel File Manager. It is never in git
- * and deploys never touch it:
+ * Sending tries these routes in order and stops at the first that works. The
+ * route that last worked is tried first next time.
+ *   1. GoDaddy Professional Email's outgoing server, signed in as info@
+ *      (smtpout.secureserver.net, port 465, then 587). Needs the settings file.
+ *   2. The hosting account's own mail server on localhost:25, which is how
+ *      GoDaddy documents sending from websites on cPanel hosting.
+ *   3. PHP's mail().
  *
- *   /home/<cpanel user>/oxygen-mail-config.php
+ * Every failure is written to the PHP error log (cPanel > Metrics > Errors).
+ * A request with the header X-Mail-Debug: sha256("oxygen-mail-debug|" + the
+ * mailbox password) also gets the full attempt log back, so the setup can be
+ * checked from outside cPanel without exposing anything to visitors.
+ *
+ * Settings file, never in git. Either:
+ *   - /home/<cpanel user>/oxygen-mail-config.php, created in cPanel File
+ *     Manager (one folder above public_html), or
+ *   - api/_mail-config.php, written by the deploy workflow from the GitHub
+ *     secret SMTP_PASSWORD (blocked from the web by .htaccess).
  *
  *   <?php
  *   return [
@@ -19,21 +30,16 @@
  *       'password' => 'the mailbox password',
  *   ];
  *
- * Optional keys, shown with their defaults:
- *   'host' => 'smtpout.secureserver.net', 'port' => 465, 'secure' => 'ssl'
- *   ('secure' => 'tls' with 'port' => 587 uses STARTTLS instead.)
- *
- * Or, with no cPanel access: add the GitHub secret SMTP_PASSWORD and the
- * deploy writes the same settings to api/_mail-config.php (blocked from the web
- * by .htaccess, and a PHP file prints nothing even if requested).
- *
- * Without either file it falls back to mail().
+ * Optional keys: 'host', 'port', 'secure' ('ssl' or 'tls') to try a specific
+ * server first, and 'fallbacks' => false to try only that one.
  */
 
 declare(strict_types=1);
 
 const MAIL_TO = 'info@oxygen-hospital.com';
-const MAIL_FROM = 'website@oxygen-hospital.com';
+// Sender of every message. The SPF record covers both the hosting server and
+// GoDaddy's mail servers for this domain.
+const MAIL_FROM = 'info@oxygen-hospital.com';
 // Only pages on these hosts may post here.
 const ALLOWED_HOSTS = ['oxygen-hospital.com', 'www.oxygen-hospital.com'];
 // Per visitor: at most this many submissions in RATE_WINDOW seconds.
@@ -106,14 +112,24 @@ function stop_if_bot(array $data): void
     }
 }
 
-function rate_limit(): void
+/** A private scratch folder for the rate limiter and the preferred route. */
+function state_dir(): ?string
 {
-    // Behind Cloudflare, REMOTE_ADDR is Cloudflare's address, not the visitor's.
-    $ip = $_SERVER['HTTP_CF_CONNECTING_IP'] ?? $_SERVER['REMOTE_ADDR'] ?? 'unknown';
     $dir = sys_get_temp_dir() . '/oxygen-forms';
     if (!is_dir($dir) && !@mkdir($dir, 0700, true)) {
+        return null;
+    }
+    return $dir;
+}
+
+function rate_limit(): void
+{
+    $dir = state_dir();
+    if ($dir === null) {
         return; // No writable temp folder: skip limiting rather than block real patients.
     }
+    // Behind Cloudflare, REMOTE_ADDR is Cloudflare's address, not the visitor's.
+    $ip = $_SERVER['HTTP_CF_CONNECTING_IP'] ?? $_SERVER['REMOTE_ADDR'] ?? 'unknown';
     $file = $dir . '/' . hash('sha256', $ip);
     $now = time();
     $hits = [];
@@ -138,6 +154,67 @@ function one_line(string $value): string
     return trim((string) preg_replace('/[\r\n]+/', ' ', $value));
 }
 
+/** The settings file, or null if there is none. */
+function mail_config(): ?array
+{
+    $root = rtrim($_SERVER['DOCUMENT_ROOT'] ?? '', '/');
+    $home = $root !== '' ? dirname($root) : dirname(__DIR__, 2);
+    foreach ([$home . '/oxygen-mail-config.php', __DIR__ . '/_mail-config.php'] as $file) {
+        if (!@is_file($file)) {
+            continue;
+        }
+        $config = include $file;
+        if (is_array($config) && !empty($config['username']) && !empty($config['password'])) {
+            return $config;
+        }
+        error_log('[website form] ' . basename($file) . ' must return an array with username and password.');
+    }
+    return null;
+}
+
+/** The routes to try, in order. */
+function mail_routes(?array $config): array
+{
+    $routes = [];
+    $fallbacks = true;
+    if ($config !== null) {
+        $auth = [(string) $config['username'], (string) $config['password']];
+        if (isset($config['host']) || isset($config['port'])) {
+            $routes[] = [
+                'label' => 'configured server',
+                'host' => (string) ($config['host'] ?? 'smtpout.secureserver.net'),
+                'port' => (int) ($config['port'] ?? 465),
+                'secure' => (string) ($config['secure'] ?? 'ssl'),
+                'auth' => $auth,
+            ];
+            $fallbacks = ($config['fallbacks'] ?? true) !== false;
+        }
+        if ($fallbacks) {
+            $routes[] = ['label' => 'smtpout 465', 'host' => 'smtpout.secureserver.net', 'port' => 465, 'secure' => 'ssl', 'auth' => $auth];
+            $routes[] = ['label' => 'smtpout 587', 'host' => 'smtpout.secureserver.net', 'port' => 587, 'secure' => 'tls', 'auth' => $auth];
+        }
+    }
+    if ($fallbacks) {
+        $routes[] = ['label' => 'localhost 25', 'host' => 'localhost', 'port' => 25, 'secure' => 'plain', 'auth' => null];
+    }
+
+    // Try the route that worked last time first.
+    $dir = state_dir();
+    $preferred = $dir !== null ? @file_get_contents($dir . '/route') : false;
+    if (is_string($preferred) && $preferred !== '') {
+        usort($routes, static fn (array $a, array $b): int => ($b['label'] === $preferred) <=> ($a['label'] === $preferred));
+    }
+    return $routes;
+}
+
+function remember_route(string $label): void
+{
+    $dir = state_dir();
+    if ($dir !== null) {
+        @file_put_contents($dir . '/route', $label, LOCK_EX);
+    }
+}
+
 function send_and_respond(string $subject, array $lines, string $replyTo): void
 {
     $body = implode("\n", $lines) . "\n\nSent from the form on " . ALLOWED_HOSTS[0] . ' at ' . gmdate('Y-m-d H:i') . " UTC.\n";
@@ -145,80 +222,80 @@ function send_and_respond(string $subject, array $lines, string $replyTo): void
     $replyTo = one_line($replyTo);
 
     $config = mail_config();
-    if ($config !== null) {
-        $result = smtp_send($config, MAIL_TO, $encodedSubject, $body, $replyTo);
-        $sent = $result === true;
-        if (!$sent) {
-            // Visible in cPanel > Metrics > Errors, never to the visitor.
-            error_log('[website form] SMTP failed: ' . $result);
+    $summary = [$config === null ? 'settings file: missing' : 'settings file: found'];
+    $log = $summary;
+
+    foreach (mail_routes($config) as $route) {
+        [$sent, $step, $detail] = smtp_send($route, $encodedSubject, $body, $replyTo);
+        if ($sent) {
+            remember_route($route['label']);
+            finish(true, $config, $summary, $log, $route['label']);
         }
-    } else {
-        $headers = implode(CRLF, [
-            'From: Oxygen Hospital Website <' . MAIL_FROM . '>',
-            'Reply-To: ' . $replyTo,
-            'MIME-Version: 1.0',
-            'Content-Type: text/plain; charset=UTF-8',
-            'Content-Transfer-Encoding: 8bit',
-        ]);
-        // Setting the envelope sender (-f) keeps SPF aligned, but some shared
-        // hosts refuse it; fall back to the host's default sender if so.
-        $sent = @mail(MAIL_TO, $encodedSubject, $body, $headers, '-f' . MAIL_FROM);
-        if (!$sent) {
-            $first = error_get_last()['message'] ?? 'unknown';
-            $sent = @mail(MAIL_TO, $encodedSubject, $body, $headers);
-            if (!$sent) {
-                error_log('[website form] mail() failed; add oxygen-mail-config.php to send over SMTP. With -f: '
-                    . $first . ' | without -f: ' . (error_get_last()['message'] ?? 'unknown'));
-            }
-        }
+        $summary[] = $route['label'] . ': failed at ' . $step;
+        $log[] = $route['label'] . ': failed at ' . $step . ': ' . $detail;
     }
 
-    if (!$sent) {
-        respond(502, ['error' => 'Could not send right now.']);
+    // Last resort: PHP's mail(), with and without setting the envelope sender.
+    $headers = implode(CRLF, [
+        'From: Oxygen Hospital Website <' . MAIL_FROM . '>',
+        'Reply-To: ' . $replyTo,
+        'MIME-Version: 1.0',
+        'Content-Type: text/plain; charset=UTF-8',
+        'Content-Transfer-Encoding: 8bit',
+    ]);
+    if (@mail(MAIL_TO, $encodedSubject, $body, $headers, '-f' . MAIL_FROM) || @mail(MAIL_TO, $encodedSubject, $body, $headers)) {
+        finish(true, $config, $summary, $log, 'mail()');
     }
-    respond(200, ['ok' => true]);
+    $summary[] = 'mail(): refused';
+    $log[] = 'mail(): refused: ' . (error_get_last()['message'] ?? 'returned false');
+
+    finish(false, $config, $summary, $log);
 }
 
-/** The SMTP settings file one folder above public_html, or null if absent. */
-function mail_config(): ?array
+function finish(bool $sent, ?array $config, array $summary, array $log, string $via = ''): void
 {
-    $root = rtrim($_SERVER['DOCUMENT_ROOT'] ?? '', '/');
-    $home = $root !== '' ? dirname($root) : dirname(__DIR__, 2);
-    $file = $home . '/oxygen-mail-config.php';
-    if (!is_file($file)) {
-        $file = __DIR__ . '/_mail-config.php'; // written by the deploy workflow
+    $debug = debug_allowed($config);
+    if ($sent) {
+        respond(200, $debug ? ['ok' => true, 'via' => $via, 'log' => $log] : ['ok' => true]);
     }
-    if (!is_file($file)) {
-        return null;
+    // Visible in cPanel > Metrics > Errors, never to the visitor.
+    error_log('[website form] could not send: ' . implode(' | ', $log));
+    $body = ['error' => 'Could not send right now.', 'code' => $summary];
+    if ($debug) {
+        $body['log'] = $log;
     }
-    $config = include $file;
-    if (!is_array($config) || empty($config['username']) || empty($config['password'])) {
-        error_log('[website form] oxygen-mail-config.php must return an array with username and password.');
-        return null;
+    respond(502, $body);
+}
+
+/** Full attempt logs only for requests that prove they know the mailbox password. */
+function debug_allowed(?array $config): bool
+{
+    $given = (string) ($_SERVER['HTTP_X_MAIL_DEBUG'] ?? '');
+    if ($config === null || $given === '') {
+        return false;
     }
-    return $config;
+    return hash_equals(hash('sha256', 'oxygen-mail-debug|' . $config['password']), $given);
 }
 
 /**
- * Minimal authenticated SMTP client: implicit TLS on 465, or STARTTLS on 587.
- * Returns true, or a description of the step that failed (never the password).
+ * Minimal SMTP client: implicit TLS ('ssl'), STARTTLS ('tls') or plain, with
+ * optional AUTH LOGIN. Returns [sent, step reached, server reply or error].
+ * The password never appears in the reply text.
  *
- * @return true|string
+ * @return array{0: bool, 1: string, 2: string}
  */
-function smtp_send(array $cfg, string $to, string $encodedSubject, string $body, string $replyTo)
+function smtp_send(array $route, string $encodedSubject, string $body, string $replyTo): array
 {
-    $host = (string) ($cfg['host'] ?? 'smtpout.secureserver.net');
-    $port = (int) ($cfg['port'] ?? 465);
-    $secure = (string) ($cfg['secure'] ?? 'ssl');
-    $user = (string) $cfg['username'];
+    $host = $route['host'];
+    $from = $route['auth'][0] ?? MAIL_FROM;
 
-    $context = stream_context_create(['ssl' => ['verify_peer' => true, 'verify_peer_name' => true]]);
-    $scheme = $secure === 'ssl' ? 'ssl://' : 'tcp://';
-    $fp = @stream_socket_client($scheme . $host . ':' . $port, $errno, $errstr, 20, STREAM_CLIENT_CONNECT, $context);
+    $context = stream_context_create(['ssl' => ['verify_peer' => true, 'verify_peer_name' => true, 'peer_name' => $host]]);
+    $scheme = $route['secure'] === 'ssl' ? 'ssl://' : 'tcp://';
+    $fp = @stream_socket_client($scheme . $host . ':' . $route['port'], $errno, $errstr, 8, STREAM_CLIENT_CONNECT, $context);
     if (!$fp) {
-        return "connect to $host:$port failed: $errstr ($errno)";
+        return [false, 'connect', trim($errstr . ' (' . $errno . ')')];
     }
-    stream_set_timeout($fp, 20);
+    stream_set_timeout($fp, 15);
 
     // One SMTP reply, which may span several "250-..." lines.
     $read = static function () use ($fp): string {
@@ -237,25 +314,27 @@ function smtp_send(array $cfg, string $to, string $encodedSubject, string $body,
         }
         $reply = $read();
         if (!in_array((int) substr($reply, 0, 3), $expect, true)) {
-            throw new RuntimeException($label . ': ' . trim($reply));
+            throw new RuntimeException($label . "\n" . (trim($reply) !== '' ? trim($reply) : 'no reply'));
         }
     };
 
     try {
         $step(null, [220], 'greeting');
         $step('EHLO oxygen-hospital.com', [250], 'EHLO');
-        if ($secure === 'tls') {
+        if ($route['secure'] === 'tls') {
             $step('STARTTLS', [220], 'STARTTLS');
-            if (!stream_socket_enable_crypto($fp, true, STREAM_CRYPTO_METHOD_TLS_CLIENT)) {
-                throw new RuntimeException('TLS negotiation failed');
+            if (!@stream_socket_enable_crypto($fp, true, STREAM_CRYPTO_METHOD_TLS_CLIENT)) {
+                throw new RuntimeException("STARTTLS\nTLS negotiation failed");
             }
             $step('EHLO oxygen-hospital.com', [250], 'EHLO after STARTTLS');
         }
-        $step('AUTH LOGIN', [334], 'AUTH');
-        $step(base64_encode($user), [334], 'AUTH username');
-        $step(base64_encode((string) $cfg['password']), [235], 'AUTH password (check the mailbox password)');
-        $step('MAIL FROM:<' . $user . '>', [250], 'MAIL FROM');
-        $step('RCPT TO:<' . $to . '>', [250, 251], 'RCPT TO');
+        if ($route['auth'] !== null) {
+            $step('AUTH LOGIN', [334], 'sign-in');
+            $step(base64_encode($route['auth'][0]), [334], 'sign-in');
+            $step(base64_encode($route['auth'][1]), [235], 'sign-in (password)');
+        }
+        $step('MAIL FROM:<' . $from . '>', [250], 'sender');
+        $step('RCPT TO:<' . MAIL_TO . '>', [250, 251], 'recipient');
         $step('DATA', [354], 'DATA');
 
         // Normalise line endings, then dot-stuff lines that start with ".".
@@ -263,14 +342,13 @@ function smtp_send(array $cfg, string $to, string $encodedSubject, string $body,
         $text = (string) preg_replace('/^\./m', '..', $text);
         $text = str_replace("\n", CRLF, $text);
 
-        $domain = substr((string) strrchr($user, '@'), 1) ?: 'oxygen-hospital.com';
         $message = implode(CRLF, [
             'Date: ' . date('r'),
-            'From: Oxygen Hospital Website <' . $user . '>',
-            'To: <' . $to . '>',
+            'From: Oxygen Hospital Website <' . $from . '>',
+            'To: <' . MAIL_TO . '>',
             'Reply-To: ' . $replyTo,
             'Subject: ' . $encodedSubject,
-            'Message-ID: <' . bin2hex(random_bytes(12)) . '@' . $domain . '>',
+            'Message-ID: <' . bin2hex(random_bytes(12)) . '@oxygen-hospital.com>',
             'MIME-Version: 1.0',
             'Content-Type: text/plain; charset=UTF-8',
             'Content-Transfer-Encoding: 8bit',
@@ -280,10 +358,11 @@ function smtp_send(array $cfg, string $to, string $encodedSubject, string $body,
         $step($message . CRLF . '.', [250], 'message');
         fwrite($fp, 'QUIT' . CRLF);
         fclose($fp);
-        return true;
+        return [true, 'sent', ''];
     } catch (Throwable $e) {
         @fwrite($fp, 'QUIT' . CRLF);
         fclose($fp);
-        return $e->getMessage();
+        $parts = explode("\n", $e->getMessage(), 2);
+        return [false, $parts[0], $parts[1] ?? ''];
     }
 }

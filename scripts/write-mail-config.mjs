@@ -6,7 +6,9 @@
 
 import { writeFileSync } from "node:fs";
 
-const password = process.env.SMTP_PASSWORD;
+// Trimmed: a password pasted into GitHub with a stray space or newline would
+// otherwise fail to sign in.
+const password = (process.env.SMTP_PASSWORD ?? "").trim();
 if (!password) {
   console.log("SMTP_PASSWORD not set; no mail settings written.");
   process.exit(0);
