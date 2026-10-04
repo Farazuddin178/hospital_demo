@@ -5,10 +5,12 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { contactSchema, type ContactInput } from "@/lib/schemas";
 import { siteConfig } from "@/lib/site-data";
-import { submitForm, usesWhatsApp } from "@/lib/submit-form";
+import { submitForm, whatsAppUrl } from "@/lib/submit-form";
 
 export default function ContactForm() {
-  const [status, setStatus] = useState<"idle" | "sending" | "sent" | "whatsapp" | "error">("idle");
+  const [status, setStatus] = useState<"idle" | "sending" | "sent" | "error">("idle");
+  // Kept after a failed send, so the visitor can pass the same text on by WhatsApp.
+  const [fallbackText, setFallbackText] = useState("");
   const {
     register,
     handleSubmit,
@@ -18,20 +20,22 @@ export default function ContactForm() {
 
   async function onSubmit(data: ContactInput) {
     setStatus("sending");
+    const text = [
+      "Website enquiry",
+      `Name: ${data.firstName} ${data.lastName}`,
+      `Email: ${data.email}`,
+      data.phone ? `Phone: ${data.phone}` : "",
+      "",
+      data.message,
+    ]
+      .filter((line, i) => line !== "" || i === 4)
+      .join("\n");
     try {
-      const text = [
-        "Website enquiry",
-        `Name: ${data.firstName} ${data.lastName}`,
-        `Email: ${data.email}`,
-        data.phone ? `Phone: ${data.phone}` : "",
-        "",
-        data.message,
-      ]
-        .filter((line, i) => line !== "" || i === 4)
-        .join("\n");
-      setStatus(await submitForm("contact", data, text));
+      await submitForm("contact", data);
+      setStatus("sent");
       reset();
     } catch {
+      setFallbackText(text);
       setStatus("error");
     }
   }
@@ -118,16 +122,17 @@ export default function ContactForm() {
         {isSubmitting ? "Sending…" : "Send Message"}
       </button>
 
-      {usesWhatsApp && (
-        <p className="text-sm text-ink-muted">
-          Your message opens in WhatsApp, addressed to {siteConfig.appointmentsPhone}. Press send there to reach us.
-        </p>
-      )}
-
       <p id="contact-form-status" role="status" aria-live="polite" className="text-sm">
         {status === "sent" && <span className="text-teal-700 dark:text-teal-300">Thank you. Your message has been sent.</span>}
-        {status === "whatsapp" && <span className="text-teal-700 dark:text-teal-300">WhatsApp has opened with your message. Send it there and we&apos;ll reply.</span>}
-        {status === "error" && <span className="text-accent-700">Something went wrong. Please try again.</span>}
+        {status === "error" && (
+          <span className="text-accent-700">
+            Your message could not be sent. Please try again, call {siteConfig.phonePrimary}, or{" "}
+            <a href={whatsAppUrl(fallbackText)} target="_blank" rel="noopener noreferrer" className="font-semibold underline">
+              send it on WhatsApp
+            </a>
+            .
+          </span>
+        )}
       </p>
     </form>
   );

@@ -27,6 +27,12 @@ AddType image/x-icon .ico
   # Never rewrite AutoSSL's validation files.
   RewriteRule ^\.well-known/ - [L]
 
+  # Website forms: /api/contact and /api/book-appointment run the PHP files
+  # in /api, which email the submission to the hospital.
+  RewriteRule ^api/(contact|book-appointment)/?$ api/$1.php [L]
+  # Shared helper, never called directly.
+  RewriteRule ^api/_ - [F,L]
+
   # Old URL kept working.
   RewriteRule ^appointment/?$ /book-appointment/ [L,R=301]
 </IfModule>

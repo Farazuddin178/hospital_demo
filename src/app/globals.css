@@ -217,6 +217,20 @@ body {
       linear-gradient(180deg, #101a22 0%, #0d141a 100%);
   }
 
+  /* Homepage hero: the same dawn/dusk palette as the WebGL sunset in
+     SunsetHero.tsx. Paints on the first frame and stays as the background
+     when WebGL is unavailable. */
+  .bg-sunset {
+    background:
+      radial-gradient(38% 30% at 84% 82%, rgb(255 236 210 / 0.9), transparent 70%),
+      linear-gradient(0deg, #c6cfdc 0%, #d9d5dc 14%, #f7c39e 22%, #fde5d4 46%, #e6eff7 100%);
+  }
+  .dark .bg-sunset {
+    background:
+      radial-gradient(38% 30% at 84% 82%, rgb(242 120 80 / 0.35), transparent 70%),
+      linear-gradient(0deg, #15161f 0%, #2a1a26 14%, #9e4c3d 22%, #3d2942 46%, #0d141f 100%);
+  }
+
   /* Inverted band used for the closing CTA and the footer. */
   .bg-ink-band {
     background: linear-gradient(160deg, #1d3f55 0%, #142c3c 62%, #11242f 100%);

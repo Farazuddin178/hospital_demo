@@ -34,25 +34,19 @@ export const siteConfig = {
   tagline: "Your Health, Our Priority",
   // Set NEXT_PUBLIC_SITE_URL once the domain is bought; canonical URLs, the
   // sitemap and share cards all read it.
-  url: process.env.NEXT_PUBLIC_SITE_URL || "https://www.oxygenhospital.example",
+  url: process.env.NEXT_PUBLIC_SITE_URL || "https://oxygen-hospital.com",
   // Chandrayangutta branch (primary) and Falaknuma branch, per letterhead.
   phonePrimary: "040-24443631",
   phoneSecondary: "+91 97001 73631",
   // The hospital asked for the Falaknuma mobile on the booking and patient pages.
   // Online requests also go to this number on WhatsApp until a backend exists.
   appointmentsPhone: "+91 97001 73631",
-  // Placeholders until the domain is bought; not shown anywhere on the site.
-  emailAdmin: "admin@oxygenhospital.example",
-  emailSupport: "patient-support@oxygenhospital.example",
+  // Shown under the phone numbers, and where the website forms are delivered
+  // (public/api/*.php on the static build).
+  email: "info@oxygen-hospital.com",
   address: "Beside Ruman Hotel, Chandrayangutta, Hyderabad, Telangana",
   hours: "Open 24/7 · All Week Days",
   logo: "/logo.png",
-  social: {
-    facebook: "https://facebook.com",
-    twitter: "https://twitter.com",
-    youtube: "https://youtube.com",
-    instagram: "https://instagram.com",
-  },
 };
 
 export type NavItem = { label: string; href: string; /** Optional second line, e.g. an area name. */ detail?: string };

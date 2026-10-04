@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import ContactForm from "@/components/ContactForm";
+import { siteConfig } from "@/lib/site-data";
 import { locations } from "@/lib/home-content";
 
 const mainHospital = locations[0];
@@ -7,7 +8,7 @@ const mainHospital = locations[0];
 export const metadata: Metadata = {
   title: "Contact Us",
   description:
-    "Get in touch with Oxygen Multi Specialty Hospital for enquiries, feedback, or support. Address and phone number for the main hospital in Chandrayangutta, Hyderabad.",
+    "Get in touch with Oxygen Multi Specialty Hospital for enquiries, feedback, or support. Address, phone number and email for the main hospital in Chandrayangutta, Hyderabad.",
 };
 
 export default function ContactPage() {
@@ -27,7 +28,6 @@ export default function ContactPage() {
         </div>
         <div className="min-w-0">
           <h2 className="text-lg text-ink">Visit or Call Us</h2>
-          {/* Email addresses go here once the domain is bought. */}
           <address className="card mt-4 break-words not-italic leading-relaxed text-ink-muted">
             <p className="font-display text-lg font-semibold text-ink">{mainHospital.name}</p>
             <p className="mt-3">{mainHospital.address}</p>
@@ -37,6 +37,11 @@ export default function ContactPage() {
                 className="font-semibold text-brand-700 dark:text-brand-300"
               >
                 {mainHospital.phone}
+              </a>
+            </p>
+            <p className="mt-1">
+              <a href={`mailto:${siteConfig.email}`} className="font-semibold text-brand-700 dark:text-brand-300">
+                {siteConfig.email}
               </a>
             </p>
           </address>

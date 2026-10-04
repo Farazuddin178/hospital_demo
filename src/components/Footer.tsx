@@ -20,20 +20,6 @@ const footerSpecialties = [
 
 const visitLinks = patientResourceColumns[0].items;
 
-function Social({ href, label, children }: { href: string; label: string; children: React.ReactNode }) {
-  return (
-    <a
-      href={href}
-      aria-label={label}
-      target="_blank"
-      rel="noopener noreferrer"
-      className="grid h-10 w-10 place-items-center rounded-full border border-white/20 text-brand-100 transition duration-300 ease-calm hover:border-white/50 hover:bg-white/10 hover:text-white"
-    >
-      {children}
-    </a>
-  );
-}
-
 export default function Footer() {
   return (
     <footer className="bg-ink-band text-brand-100">
@@ -64,25 +50,6 @@ export default function Footer() {
             care with modern medical facilities.
           </p>
 
-          <div className="mt-6 flex gap-3">
-            <Social href={siteConfig.social.facebook} label="Oxygen Hospital on Facebook">
-              <svg viewBox="0 0 24 24" className="h-4 w-4 fill-current" aria-hidden="true">
-                <path d="M13.5 21v-7.5h2.5l.5-3H13.5V8.5c0-.9.25-1.5 1.53-1.5H16.5V4.3c-.27-.04-1.2-.11-2.28-.11-2.26 0-3.8 1.38-3.8 3.9V10.5H8v3h2.42V21h3.08Z" />
-              </svg>
-            </Social>
-            <Social href={siteConfig.social.instagram} label="Oxygen Hospital on Instagram">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="h-4 w-4" aria-hidden="true">
-                <rect x="3.5" y="3.5" width="17" height="17" rx="4.5" />
-                <circle cx="12" cy="12" r="4" />
-                <circle cx="17" cy="7" r="0.8" fill="currentColor" stroke="none" />
-              </svg>
-            </Social>
-            <Social href={siteConfig.social.youtube} label="Oxygen Hospital on YouTube">
-              <svg viewBox="0 0 24 24" className="h-4 w-4 fill-current" aria-hidden="true">
-                <path d="M21.6 7.2a2.5 2.5 0 0 0-1.76-1.77C18.25 5 12 5 12 5s-6.25 0-7.84.43A2.5 2.5 0 0 0 2.4 7.2 26.2 26.2 0 0 0 2 12a26.2 26.2 0 0 0 .4 4.8 2.5 2.5 0 0 0 1.76 1.77C5.75 19 12 19 12 19s6.25 0 7.84-.43a2.5 2.5 0 0 0 1.76-1.77A26.2 26.2 0 0 0 22 12a26.2 26.2 0 0 0-.4-4.8ZM10 15V9l5.2 3Z" />
-              </svg>
-            </Social>
-          </div>
         </div>
 
         <nav aria-labelledby="footer-conditions" className="lg:col-span-2">
@@ -140,6 +107,9 @@ export default function Footer() {
               className="mt-1 inline-block transition-colors hover:text-white"
             >
               {mainHospital.phone}
+            </a>
+            <a href={`mailto:${siteConfig.email}`} className="mt-1 block transition-colors hover:text-white">
+              {siteConfig.email}
             </a>
           </address>
           <Link

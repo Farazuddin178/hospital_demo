@@ -240,7 +240,7 @@ export default function HeroSearch({ index, suggestions }: HeroSearchProps) {
 
       {/* Suggestion chips double as a discoverability aid and a zero-typing path in. */}
       <div className="mt-6 flex flex-wrap items-center justify-center gap-2">
-        <span className="mr-1 text-sm text-ink-muted">Common searches</span>
+        <span className="mr-1 text-sm font-medium text-ink/80">Common searches</span>
         {suggestions.map((s) => (
           <button
             key={s}
@@ -250,7 +250,7 @@ export default function HeroSearch({ index, suggestions }: HeroSearchProps) {
               setOpen(true);
               inputRef.current?.focus();
             }}
-            className="rounded-full border border-[rgb(var(--hairline))] bg-white/70 px-3.5 py-1.5 text-sm text-ink-muted transition duration-300 ease-calm hover:border-brand-300 hover:bg-white hover:text-brand-700 dark:bg-white/5"
+            className="rounded-full border border-white/60 bg-white/80 px-3.5 py-1.5 text-sm text-ink/80 backdrop-blur-sm transition duration-300 ease-calm hover:border-brand-300 hover:bg-white hover:text-brand-700 dark:border-white/15 dark:bg-black/30 dark:text-ink dark:hover:bg-black/40 dark:hover:text-brand-200"
           >
             {s}
           </button>

@@ -77,9 +77,10 @@ const nextConfig = {
   // there is no `sharp` dependency and no third-party image host to connect to.
   pageExtensions: isStatic ? ["tsx", "ts"] : ["tsx", "ts", "server.ts"],
   env: {
-    // Forms post here (see src/lib/submit-form.ts). Empty on the static build
-    // until a backend exists, which makes the forms fall back to WhatsApp.
-    NEXT_PUBLIC_API_URL: process.env.NEXT_PUBLIC_API_URL || (isStatic ? "" : "/api"),
+    // Forms post here (see src/lib/submit-form.ts). On the server build that is
+    // the API routes; on GoDaddy it is the PHP mailer in public/api, reached
+    // through the rewrite rules in public/.htaccess.
+    NEXT_PUBLIC_API_URL: process.env.NEXT_PUBLIC_API_URL || "/api",
     NEXT_PUBLIC_STATIC_EXPORT: isStatic ? "1" : "",
   },
   ...(isStatic

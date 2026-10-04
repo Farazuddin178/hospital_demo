@@ -1,8 +1,9 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { ArrowRight, BedDouble, MapPin, Phone } from "lucide-react";
+import { ArrowRight, BedDouble, Mail, MapPin, Phone } from "lucide-react";
 
 import HeroSearch from "@/components/HeroSearch";
+import SunsetHero from "@/components/SunsetHero";
 import Photo from "@/components/Photo";
 import { siteConfig, specialties } from "@/lib/site-data";
 import {
@@ -41,32 +42,35 @@ export default function HomePage() {
   return (
     <>
       {/* ================= Hero ================================================
-          Deliberately image-free. The largest element is the headline, so the
-          page reaches its Largest Contentful Paint on the first frame with no
-          image, font, or network round trip in the way. */}
-      <section className="bg-hero-gradient">
-        <div className="mx-auto max-w-7xl px-6 pb-24 pt-16 text-center sm:pt-20 lg:px-8 lg:pb-32 lg:pt-24">
-          <p className="flex items-center justify-center">
+          Text first, sunset behind it. The headline is still the largest
+          element and paints on the first frame; the animated background
+          loads after it (see SunsetHero). The extra bottom padding leaves room
+          for the hills below the search, so text never sits on them. */}
+      <SunsetHero>
+        <div className="mx-auto max-w-7xl px-6 pb-40 pt-16 text-center sm:pt-20 lg:px-8 lg:pb-56 lg:pt-24">
+          <p data-hero-fade className="flex items-center justify-center">
             <span className="eyebrow">Chandrayangutta and Falaknuma, Hyderabad</span>
           </p>
 
-          <h1 className="mx-auto mt-6 max-w-4xl text-balance font-display text-[2.5rem] font-semibold leading-[1.08] text-ink sm:text-5xl lg:text-6xl">
+          <h1
+            data-hero-rise
+            className="mx-auto mt-6 max-w-4xl text-balance font-display text-[2.5rem] font-semibold leading-[1.08] text-ink sm:text-5xl lg:text-6xl"
+          >
             Start with a question.
             <br className="hidden sm:block" />{" "}
-            <span className="text-brand-700 dark:text-brand-300">We will take it from there.</span>
+            <span className="text-brand-700 dark:text-brand-200">We will take it from there.</span>
           </h1>
 
-          <p className="mx-auto mt-6 max-w-xl text-pretty text-lg leading-relaxed text-ink-muted">
+          <p data-hero-fade className="mx-auto mt-6 max-w-xl text-pretty text-lg leading-relaxed text-ink/75">
             Search a symptom, a specialty, a doctor, or a location. You will land on the
             right team in one step, not five.
           </p>
 
-          <div className="mt-10">
+          <div data-hero-fade className="mt-10">
             <HeroSearch index={index} suggestions={searchSuggestions} />
           </div>
-
         </div>
-      </section>
+      </SunsetHero>
 
       {/* ================= Photography band ================================== */}
       <section>
@@ -260,10 +264,16 @@ export default function HomePage() {
                 ))}
 
                 <div className="mt-auto flex flex-wrap items-center gap-x-6 gap-y-3 pt-6">
-                  <a href={tel(location.phone)} className="link-arrow">
-                    <Phone className="h-4 w-4" strokeWidth={1.7} aria-hidden="true" />
-                    {location.phone}
-                  </a>
+                  <span className="flex flex-col gap-1.5">
+                    <a href={tel(location.phone)} className="link-arrow">
+                      <Phone className="h-4 w-4" strokeWidth={1.7} aria-hidden="true" />
+                      {location.phone}
+                    </a>
+                    <a href={`mailto:${siteConfig.email}`} className="link-quiet inline-flex items-center gap-1.5 text-sm">
+                      <Mail className="h-4 w-4" strokeWidth={1.7} aria-hidden="true" />
+                      {siteConfig.email}
+                    </a>
+                  </span>
                   <a
                     href={mapsHref(`${location.name}, ${location.address}`)}
                     target="_blank"

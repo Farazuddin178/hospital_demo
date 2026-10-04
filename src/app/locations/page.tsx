@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { MapPin, Phone } from "lucide-react";
+import { Mail, MapPin, Phone } from "lucide-react";
 
 import Photo from "@/components/Photo";
 import { siteConfig } from "@/lib/site-data";
@@ -61,6 +61,12 @@ export default function LocationsPage() {
                     <Phone className="h-4 w-4 shrink-0" strokeWidth={1.7} aria-hidden="true" />
                     <a href={tel(location.phone)} className="link-quiet font-medium">
                       {location.phone}
+                    </a>
+                  </p>
+                  <p className="flex items-center gap-2.5">
+                    <Mail className="h-4 w-4 shrink-0" strokeWidth={1.7} aria-hidden="true" />
+                    <a href={`mailto:${siteConfig.email}`} className="link-quiet font-medium">
+                      {siteConfig.email}
                     </a>
                   </p>
                 </address>

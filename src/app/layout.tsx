@@ -84,6 +84,7 @@ const organizationJsonLd = {
   url: siteConfig.url,
   logo: `${siteConfig.url}${siteConfig.logo}`,
   telephone: siteConfig.phonePrimary,
+  email: siteConfig.email,
   subOrganization: locations.map((l) => ({
     "@type": "Hospital",
     name: `${l.name}, ${l.area}`,

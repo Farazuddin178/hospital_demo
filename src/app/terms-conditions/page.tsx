@@ -51,7 +51,7 @@ export default function TermsPage() {
       </p>
 
       <h2>7. Contact Us</h2>
-      <p>Questions about these terms can be raised by phone on {siteConfig.phonePrimary}.</p>
+      <p>Questions about these terms can be raised by phone on {siteConfig.phonePrimary} or by email at {siteConfig.email}.</p>
     </div>
   );
 }
