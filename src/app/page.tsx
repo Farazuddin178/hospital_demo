@@ -73,9 +73,6 @@ export default function HomePage() {
         </div>
       </SunsetHero>
 
-      {/* ================= Emergency and ambulance =========================== */}
-      <AmbulanceBanner />
-
       {/* ================= Photography band ================================== */}
       <section>
         <Photo
@@ -87,7 +84,7 @@ export default function HomePage() {
 
       {/* ================= Quick actions =====================================
           Lifted over the photograph on large screens; stacked normally on small. */}
-      <section aria-labelledby="quick-actions" className="relative z-10 bg-surface">
+      <section aria-labelledby="quick-actions" className="relative z-10 bg-surface pb-14 lg:pb-20">
         <div className="mx-auto max-w-7xl px-6 lg:px-8">
           <h2 id="quick-actions" className="sr-only">
             Common tasks
@@ -115,6 +112,10 @@ export default function HomePage() {
           </ul>
         </div>
       </section>
+
+      {/* ================= Emergency and ambulance ===========================
+          Straight after the common tasks, before the figures. */}
+      <AmbulanceBanner />
 
       {/* ================= Stats ============================================= */}
       <section aria-label="Oxygen Hospital at a glance" className="bg-surface py-20 lg:py-24">

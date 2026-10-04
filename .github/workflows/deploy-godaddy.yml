@@ -6,6 +6,8 @@
 #   Secrets:   FTP_SERVER     e.g. ftp.yourdomain.com (cPanel > FTP Accounts)
 #              FTP_USERNAME
 #              FTP_PASSWORD
+#              SMTP_PASSWORD  password of info@oxygen-hospital.com, so the website
+#                             forms can send email (optional; see public/api/_mailer.php)
 #   Variables: SITE_URL       e.g. https://www.yourdomain.com (optional)
 #              FTP_SERVER_DIR folder to upload into (optional). Normally leave
 #                             unset: the upload finds public_html by itself,
@@ -47,6 +49,15 @@ jobs:
           NEXT_PUBLIC_SITE_URL: ${{ vars.SITE_URL }}
           NEXT_PUBLIC_GA_ID: ${{ vars.GA_ID }}
           NEXT_PUBLIC_API_URL: ${{ vars.API_URL }}
+
+      # The forms sign in to the info@ mailbox to send email. Its password comes
+      # from a GitHub secret and is written only into the uploaded copy, never
+      # into the repository. GitHub masks it in the logs.
+      - name: Add mail settings
+        if: env.FTP_CONFIGURED == 'true'
+        env:
+          SMTP_PASSWORD: ${{ secrets.SMTP_PASSWORD }}
+        run: node scripts/write-mail-config.mjs
 
       # lftp's mirror creates each folder as it goes and logs every file, so a
       # failure names the exact path. Nothing on the server is deleted, which

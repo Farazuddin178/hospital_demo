@@ -23,7 +23,11 @@
  *   'host' => 'smtpout.secureserver.net', 'port' => 465, 'secure' => 'ssl'
  *   ('secure' => 'tls' with 'port' => 587 uses STARTTLS instead.)
  *
- * Without that file it falls back to mail().
+ * Or, with no cPanel access: add the GitHub secret SMTP_PASSWORD and the
+ * deploy writes the same settings to api/_mail-config.php (blocked from the web
+ * by .htaccess, and a PHP file prints nothing even if requested).
+ *
+ * Without either file it falls back to mail().
  */
 
 declare(strict_types=1);
@@ -181,6 +185,9 @@ function mail_config(): ?array
     $root = rtrim($_SERVER['DOCUMENT_ROOT'] ?? '', '/');
     $home = $root !== '' ? dirname($root) : dirname(__DIR__, 2);
     $file = $home . '/oxygen-mail-config.php';
+    if (!is_file($file)) {
+        $file = __DIR__ . '/_mail-config.php'; // written by the deploy workflow
+    }
     if (!is_file($file)) {
         return null;
     }
