@@ -1,6 +1,8 @@
 import Link from "next/link";
 import { siteConfig, specialties } from "@/lib/site-data";
-import { emergency, locations, patientResourceColumns, trustMarkers } from "@/lib/home-content";
+import { locations, patientResourceColumns, trustMarkers } from "@/lib/home-content";
+
+const mainHospital = locations[0];
 
 /** The eight specialties people search for most; the rest live on /specialties. */
 const footerSpecialties = [
@@ -35,42 +37,31 @@ function Social({ href, label, children }: { href: string; label: string; childr
 export default function Footer() {
   return (
     <footer className="bg-ink-band text-brand-100">
-      {/* Emergency line stays visible at the end of every page. */}
-      <div className="border-b border-white/10">
-        <div className="mx-auto flex max-w-7xl flex-col gap-3 px-6 py-5 sm:flex-row sm:items-center sm:justify-between lg:px-8">
-          <p className="flex flex-wrap items-center gap-x-2.5 gap-y-1 text-sm">
-            <span className="relative flex h-2 w-2" aria-hidden="true">
-              <span className="absolute inline-flex h-full w-full rounded-full bg-accent-400 opacity-60" />
-              <span className="relative inline-flex h-2 w-2 rounded-full bg-accent-300" />
-            </span>
-            <span className="font-semibold text-white">{emergency.label}</span>
-            <span className="text-brand-200">{emergency.note}</span>
-          </p>
-          <a
-            href={`tel:${emergency.phone.replace(/\s/g, "")}`}
-            className="shrink-0 rounded-full bg-white/10 px-5 py-2 text-sm font-semibold text-white transition duration-300 ease-calm hover:bg-white/20"
-          >
-            {emergency.phone}
-          </a>
-        </div>
-      </div>
-
       <div className="mx-auto grid max-w-7xl grid-cols-2 gap-x-8 gap-y-12 px-6 py-16 lg:grid-cols-12 lg:px-8 lg:py-20">
         <div className="col-span-2 lg:col-span-4">
           <div className="flex items-center gap-3">
-            <span aria-hidden="true" className="grid h-10 w-10 place-items-center rounded-xl bg-white/10 text-white">
-              <svg viewBox="0 0 32 32" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" className="h-5 w-5">
-                <path d="M4.5 22.5h23" />
-                <path d="M8.5 22.5a7.5 7.5 0 0 1 15 0" />
-                <path d="M16 9V5.5M9.6 11.6 7.2 9.2M22.4 11.6l2.4-2.4" />
-              </svg>
+            {/* The shield's white interior keeps the logo legible on this dark band;
+                the area outside the shield is transparent, so no white box shows. */}
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={siteConfig.logo}
+              alt=""
+              width={151}
+              height={176}
+              loading="lazy"
+              decoding="async"
+              className="h-14 w-auto shrink-0"
+            />
+            <span>
+              <span className="block font-display text-xl font-semibold text-white">{siteConfig.name}</span>
+              <span className="mt-1 block text-xs text-brand-200">{siteConfig.legalName}</span>
             </span>
-            <span className="font-display text-xl font-semibold text-white">{siteConfig.name}</span>
           </div>
 
           <p className="mt-5 max-w-xs text-sm leading-relaxed text-brand-200">
-            Multi-specialty care across four Hyderabad campuses, built so that the experience
-            is as considered as the medicine.
+            <strong className="font-semibold text-white">{siteConfig.hospitalName}</strong> delivers
+            quality multi-specialty healthcare across its two Hyderabad branches, combining expert
+            care with modern medical facilities.
           </p>
 
           <div className="mt-6 flex gap-3">
@@ -114,7 +105,7 @@ export default function Footer() {
           </ul>
         </nav>
 
-        <nav aria-labelledby="footer-patients" className="lg:col-span-2">
+        <nav aria-labelledby="footer-patients" className="lg:col-span-3">
           <p id="footer-patients" className="text-sm font-semibold text-white">
             Patients
           </p>
@@ -139,46 +130,17 @@ export default function Footer() {
           </ul>
         </nav>
 
-        <nav aria-labelledby="footer-locations" className="lg:col-span-2">
-          <p id="footer-locations" className="text-sm font-semibold text-white">
-            Locations
-          </p>
-          <ul className="mt-4 space-y-2.5 text-sm">
-            {locations.map((l) => (
-              <li key={l.slug}>
-                <Link href={`/locations#${l.slug}`} className="text-brand-200 transition-colors hover:text-white">
-                  {l.area}
-                </Link>
-              </li>
-            ))}
-            <li>
-              <Link href="/locations#wait-times" className="text-brand-200 transition-colors hover:text-white">
-                Wait times
-              </Link>
-            </li>
-            <li>
-              <Link href="/services" className="text-brand-200 transition-colors hover:text-white">
-                Services
-              </Link>
-            </li>
-          </ul>
-        </nav>
-
-        <div className="col-span-2 lg:col-span-2">
+        <div className="col-span-2 lg:col-span-3">
           <p className="text-sm font-semibold text-white">Contact</p>
-          <address className="mt-4 space-y-2.5 text-sm not-italic text-brand-200">
-            <p>{siteConfig.address}</p>
-            <p>
-              <a href={`tel:${siteConfig.phonePrimary.replace(/\s/g, "")}`} className="transition-colors hover:text-white">
-                {siteConfig.phonePrimary}
-              </a>
-            </p>
-            <p>
-              <a href={`mailto:${siteConfig.emailAdmin}`} className="break-all transition-colors hover:text-white">
-                {siteConfig.emailAdmin}
-              </a>
-            </p>
-            <p>{siteConfig.hours}</p>
+          <address className="mt-4 text-sm not-italic leading-relaxed text-brand-200">
+            <span className="block font-semibold text-white">{mainHospital.name}</span>
+            <span className="mt-1 block">{mainHospital.address}</span>
+            <a
+              href={`tel:${mainHospital.phone.replace(/[\s-]/g, "")}`}
+              className="mt-1 inline-block transition-colors hover:text-white"
+            >
+              {mainHospital.phone}
+            </a>
           </address>
           <Link
             href="/book-appointment"
@@ -198,7 +160,7 @@ export default function Footer() {
           </ul>
           <div className="flex flex-col items-start justify-between gap-3 text-xs text-brand-300 sm:flex-row sm:items-center">
             <p>
-              &copy; {new Date().getFullYear()} {siteConfig.name}. All rights reserved.
+              &copy; {new Date().getFullYear()} {siteConfig.legalName}. All rights reserved.
             </p>
             <div className="flex gap-6">
               <Link href="/privacy-policy" className="transition-colors hover:text-white">

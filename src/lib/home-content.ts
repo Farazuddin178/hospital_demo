@@ -19,7 +19,8 @@ import { services, specialties, type NavItem } from "@/lib/site-data";
 import type { SearchEntry } from "@/lib/search";
 
 export const emergency = {
-  phone: "+91 9100-100911",
+  // Chandrayangutta branch main line, per hospital letterhead.
+  phone: "040-24443631",
   label: "24/7 Emergency",
   note: "If this is a medical emergency, call now or go to your nearest emergency room.",
 };
@@ -46,65 +47,37 @@ export type MegaMenu = {
 
 export type Location = {
   slug: string;
+  /** Branch name exactly as the hospital supplied it. */
   name: string;
+  /** Short qualifier shown as a badge beside the name, e.g. "Main Hospital". */
+  tag?: string;
   area: string;
   address: string;
   phone: string;
-  hours: string;
-  kind: "Hospital" | "Clinic" | "Urgent care";
-  hasEmergency: boolean;
-  waitMinutes: number | null;
+  /** Confirmed facts about this branch, shown on the homepage card only. */
   highlights: string[];
 };
 
+// Both branches as supplied by the hospital (letterhead, and the website change
+// list of October 2026). Do not add services, hours or wait times here unless
+// the hospital has confirmed them.
 export const locations: Location[] = [
   {
-    slug: "banjara-hills",
-    name: "Oxygen Main Campus",
-    area: "Banjara Hills",
-    address: "8-4-120/4, Example Road, Banjara Hills, Hyderabad 500034",
-    phone: "+91 9100-100812",
-    hours: "Open 24 hours",
-    kind: "Hospital",
-    hasEmergency: true,
-    waitMinutes: 12,
-    highlights: ["Level I trauma centre", "Cardiac catheterisation lab", "420 inpatient beds"],
+    slug: "chandrayangutta",
+    name: "Oxygen Multi Specialty Hospital",
+    tag: "Main Hospital",
+    area: "Chandrayangutta",
+    address: "Beside Ruman Hotel, Chandrayangutta, Hyderabad, Telangana",
+    phone: "040-24443631",
+    highlights: ["100 inpatient beds"],
   },
   {
-    slug: "gachibowli",
-    name: "Oxygen Gachibowli",
-    area: "Gachibowli",
-    address: "Plot 41, Financial District Road, Gachibowli, Hyderabad 500032",
-    phone: "+91 9100-500812",
-    hours: "Mon to Sat, 7:00am to 9:00pm",
-    kind: "Hospital",
-    hasEmergency: true,
-    waitMinutes: 25,
-    highlights: ["Day surgery", "Maternity and newborn care", "Outpatient imaging"],
-  },
-  {
-    slug: "secunderabad",
-    name: "Oxygen Secunderabad",
-    area: "Secunderabad",
-    address: "12-A, Sarojini Devi Road, Secunderabad, Hyderabad 500003",
-    phone: "+91 9100-500813",
-    hours: "Daily, 8:00am to 10:00pm",
-    kind: "Urgent care",
-    hasEmergency: false,
-    waitMinutes: 9,
-    highlights: ["Walk-in urgent care", "Lab and diagnostics", "Physiotherapy"],
-  },
-  {
-    slug: "kukatpally",
-    name: "Oxygen Kukatpally Clinic",
-    area: "Kukatpally",
-    address: "Road No. 4, KPHB Colony, Kukatpally, Hyderabad 500072",
-    phone: "+91 9100-500814",
-    hours: "Mon to Sat, 9:00am to 7:00pm",
-    kind: "Clinic",
-    hasEmergency: false,
-    waitMinutes: null,
-    highlights: ["Family medicine", "Paediatrics", "Vaccination clinic"],
+    slug: "falaknuma",
+    name: "Oxygen Multi Specialty Hospital",
+    area: "Falaknuma",
+    address: "Opposite Nabeel Function Hall, Shamsheer Gunj, Engine Bowli, Hyderabad, Telangana",
+    phone: "+91 97001 73631",
+    highlights: [],
   },
 ];
 
@@ -206,31 +179,26 @@ export const megaMenus: MegaMenu[] = [
     columns: [
       {
         heading: "Hospitals",
-        items: locations
-          .filter((l) => l.kind === "Hospital")
-          .map((l) => ({ label: `${l.name}, ${l.area}`, href: `/locations#${l.slug}` })),
-      },
-      {
-        heading: "Clinics & urgent care",
-        items: locations
-          .filter((l) => l.kind !== "Hospital")
-          .map((l) => ({ label: `${l.name}, ${l.area}`, href: `/locations#${l.slug}` })),
+        items: locations.map((l) => ({
+          label: l.tag ? `${l.name} - ${l.tag}` : l.name,
+          detail: l.area,
+          href: `/locations#${l.slug}`,
+        })),
       },
       {
         heading: "Getting here",
         items: [
-          { label: "Parking and directions", href: "/locations#directions" },
-          { label: "Emergency room wait times", href: "/locations#wait-times" },
-          { label: "All locations", href: "/locations" },
+          { label: "Addresses and directions", href: "/locations" },
+          { label: "Emergency contacts", href: "/locations#emergency" },
           { label: "Contact us", href: "/contact" },
         ],
       },
     ],
     feature: {
       title: "Emergency care, around the clock",
-      body: "Two of our campuses run a 24/7 emergency department. Current wait times are published on every location page.",
-      href: "/locations#wait-times",
-      cta: "Check wait times",
+      body: `Call ahead on ${emergency.phone} and the team will be ready for you when you arrive.`,
+      href: "/locations#emergency",
+      cta: "Emergency contacts",
     },
   },
 ];
@@ -247,7 +215,7 @@ export type QuickAction = {
 export const quickActions: QuickAction[] = [
   {
     title: "Find a doctor",
-    description: "Search 240+ specialists by name, condition, or language.",
+    description: "Find the right specialist by condition or specialty.",
     href: "/specialties",
     Icon: Stethoscope,
   },
@@ -258,9 +226,9 @@ export const quickActions: QuickAction[] = [
     Icon: CalendarDays,
   },
   {
-    title: "Urgent care wait times",
-    description: "Live waits across all four Hyderabad locations.",
-    href: "/locations#wait-times",
+    title: "24/7 emergency care",
+    description: `Call ahead on ${emergency.phone} and we will be ready for you.`,
+    href: "/locations#emergency",
     Icon: Clock,
   },
   {
@@ -278,50 +246,14 @@ export const trustMarkers = [
   "Green OT certified",
 ];
 
+// Only figures the hospital has supplied (bed count, branches) or that the site
+// itself defines (the specialty list). No survey scores or headcounts until the
+// hospital gives real ones.
 export const stats = [
-  { value: "17", label: "Clinical specialties", detail: "Coordinated under one care plan" },
-  { value: "240+", label: "Doctors and specialists", detail: "Across four Hyderabad campuses" },
-  { value: "12 min", label: "Median emergency wait", detail: "Main campus, this month" },
-  { value: "96%", label: "Would recommend us", detail: "From 4,100 post-visit surveys" },
-];
-
-export type Provider = {
-  name: string;
-  role: string;
-  specialtySlug: string;
-  languages: string;
-  image: string;
-};
-
-export const featuredProviders: Provider[] = [
-  {
-    name: "Dr. Asha Varma",
-    role: "Interventional Cardiologist",
-    specialtySlug: "cardiology",
-    languages: "English, Telugu, Hindi",
-    image: "provider-cardio",
-  },
-  {
-    name: "Dr. Imran Qureshi",
-    role: "Consultant Paediatrician",
-    specialtySlug: "pediatrics",
-    languages: "English, Urdu, Hindi",
-    image: "provider-peds",
-  },
-  {
-    name: "Dr. Leela Nair",
-    role: "Orthopaedic Surgeon",
-    specialtySlug: "orthopedics",
-    languages: "English, Malayalam, Tamil",
-    image: "provider-ortho",
-  },
-  {
-    name: "Dr. Rohit Deshpande",
-    role: "Consultant Neurologist",
-    specialtySlug: "neurology",
-    languages: "English, Marathi, Hindi",
-    image: "provider-neuro",
-  },
+  { value: String(specialties.length), label: "Clinical specialties", detail: "Coordinated under one care plan" },
+  { value: "100", label: "Inpatient beds", detail: "At the main hospital, Chandrayangutta" },
+  { value: String(locations.length), label: "Hospital branches", detail: "Chandrayangutta and Falaknuma" },
+  { value: "24/7", label: "Emergency line", detail: emergency.phone },
 ];
 
 export const carePrinciples = [
@@ -339,53 +271,6 @@ export const carePrinciples = [
     title: "Costs before care",
     body: "You get a written estimate before any planned procedure, with the insurance portion worked out in advance.",
     Icon: ShieldCheck,
-  },
-];
-
-export const testimonial = {
-  quote:
-    "I came in at 2am with chest pain and was in the cath lab within forty minutes. What stayed with me was smaller than that. Someone stood with my mother in the waiting room and explained every step, in Telugu, until she understood it.",
-  name: "Sandeep R.",
-  detail: "Cardiac patient, Banjara Hills campus",
-  image: "patient-story",
-};
-
-export type Article = {
-  title: string;
-  category: string;
-  readingTime: string;
-  excerpt: string;
-  href: string;
-  image: string;
-};
-
-export const articles: Article[] = [
-  {
-    title: "When chest pain is an emergency, and when it is not",
-    category: "Heart health",
-    readingTime: "4 min read",
-    excerpt:
-      "Four signs that mean call an ambulance now, and the far more common causes that can safely wait for a morning appointment.",
-    href: "/specialties/cardiology",
-    image: "article-emergency",
-  },
-  {
-    title: "Recovering well after a joint replacement",
-    category: "Orthopaedics",
-    readingTime: "6 min read",
-    excerpt:
-      "What the first six weeks actually look like, how much walking is too much, and the milestones worth tracking.",
-    href: "/specialties/orthopedics",
-    image: "article-recovery",
-  },
-  {
-    title: "Questions worth asking at your next appointment",
-    category: "Patient guides",
-    readingTime: "3 min read",
-    excerpt:
-      "A short list that consistently leads to better consultations, gathered from patients and doctors on our own wards.",
-    href: "/patients#prepare",
-    image: "article-team",
   },
 ];
 
@@ -465,20 +350,12 @@ export function buildSearchIndex(): SearchEntry[] {
     category: "Specialty",
   }));
 
-  const doctorEntries: SearchEntry[] = featuredProviders.map((p) => ({
-    label: p.name,
-    hint: `${p.role} · ${p.languages}`,
-    href: `/specialties/${p.specialtySlug}`,
-    category: "Doctor",
-    keywords: [specialtyName(p.specialtySlug), p.languages, "doctor", "consultant"],
-  }));
-
   const locationEntries: SearchEntry[] = locations.map((l) => ({
-    label: l.name,
-    hint: `${l.kind} · ${l.area} · ${l.hours}`,
+    label: `${l.name}, ${l.area}`,
+    hint: l.address,
     href: `/locations#${l.slug}`,
     category: "Location",
-    keywords: [l.area, l.kind, "near me", "address", "directions"],
+    keywords: [l.area, l.tag ?? "", "hospital", "near me", "address", "directions"],
   }));
 
   const serviceEntries: SearchEntry[] = services.map((s) => ({
@@ -511,9 +388,9 @@ export function buildSearchIndex(): SearchEntry[] {
       keywords: ["login", "reports", "records", "results"],
     },
     {
-      label: "Emergency room wait times",
-      hint: "Live waits across all campuses",
-      href: "/locations#wait-times",
+      label: "Emergency care",
+      hint: `Call ${emergency.phone}`,
+      href: "/locations#emergency",
       category: "Page",
       keywords: ["er", "emergency", "urgent", "queue"],
     },
@@ -526,7 +403,7 @@ export function buildSearchIndex(): SearchEntry[] {
     },
     {
       label: "Contact us",
-      hint: "Phone, email, and enquiry form",
+      hint: "Phone, address, and enquiry form",
       href: "/contact",
       category: "Page",
       keywords: ["phone", "email", "enquiry", "reach"],
@@ -536,7 +413,6 @@ export function buildSearchIndex(): SearchEntry[] {
   return [
     ...conditionEntries,
     ...specialtyEntries,
-    ...doctorEntries,
     ...locationEntries,
     ...serviceEntries,
     ...pageEntries,
@@ -549,5 +425,5 @@ export const searchSuggestions = [
   "Fever in children",
   "Knee replacement",
   "Pregnancy and maternity",
-  "Emergency room wait times",
+  "Emergency care",
 ];

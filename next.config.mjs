@@ -2,6 +2,21 @@
 
 const isDev = process.env.NODE_ENV !== "production";
 
+// Two build targets from one codebase:
+//
+//   npm run build          Node server (Render, or any future backend host).
+//                          API routes, middleware and response headers all run.
+//   npm run build:static   Plain HTML/CSS/JS in ./out for GoDaddy shared hosting.
+//                          No server, so the API routes and middleware are left
+//                          out of the build (not deleted) and public/.htaccess
+//                          applies the headers and redirects instead.
+//
+// Server-only files are named *.server.ts (src/middleware.server.ts and
+// src/app/api/**/route.server.ts). Only the server build lists "server.ts" in
+// pageExtensions, so only the server build turns them into routes.
+const isStatic =
+  process.env.STATIC_EXPORT === "1" || process.env.npm_lifecycle_event === "build:static";
+
 // Content-Security-Policy and other hardening headers applied to every response.
 // Keep in sync with any third-party scripts (analytics, maps, forms) added later.
 // 'unsafe-eval' is required in dev only — Next.js Fast Refresh/webpack eval devtool
@@ -28,14 +43,8 @@ const securityHeaders = [
   { key: "Permissions-Policy", value: "camera=(), microphone=(), geolocation=(self)" },
 ];
 
-const nextConfig = {
-  reactStrictMode: true,
-  poweredByHeader: false, // don't leak framework/version info
-  // Lets a production build run without fighting a dev server for the .next lock.
-  distDir: process.env.NEXT_DIST_DIR || ".next",
-  // No `images` block: every photo is a pre-encoded WebP in /public/images,
-  // served from our own origin. Nothing goes through the image optimizer, so
-  // there is no `sharp` dependency and no third-party image host to connect to.
+// Static hosting cannot run these; public/.htaccess carries the same rules.
+const serverOnly = {
   async headers() {
     return [
       {
@@ -56,6 +65,31 @@ const nextConfig = {
       { source: "/appointment", destination: "/book-appointment", permanent: true },
     ];
   },
+};
+
+const nextConfig = {
+  reactStrictMode: true,
+  poweredByHeader: false, // don't leak framework/version info
+  // Lets a production build run without fighting a dev server for the .next lock.
+  distDir: process.env.NEXT_DIST_DIR || ".next",
+  // No `images` block: every photo is a pre-encoded WebP in /public/images,
+  // served from our own origin. Nothing goes through the image optimizer, so
+  // there is no `sharp` dependency and no third-party image host to connect to.
+  pageExtensions: isStatic ? ["tsx", "ts"] : ["tsx", "ts", "server.ts"],
+  env: {
+    // Forms post here (see src/lib/submit-form.ts). Empty on the static build
+    // until a backend exists, which makes the forms fall back to WhatsApp.
+    NEXT_PUBLIC_API_URL: process.env.NEXT_PUBLIC_API_URL || (isStatic ? "" : "/api"),
+    NEXT_PUBLIC_STATIC_EXPORT: isStatic ? "1" : "",
+  },
+  ...(isStatic
+    ? {
+        output: "export",
+        // Writes /locations/index.html rather than /locations.html, so any
+        // static host serves clean URLs without rewrite rules.
+        trailingSlash: true,
+      }
+    : serverOnly),
 };
 
 export default nextConfig;

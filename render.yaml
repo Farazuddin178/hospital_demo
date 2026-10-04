@@ -1,3 +1,5 @@
+# Node server build (API routes + middleware). GoDaddy uses the static build
+# instead; see "Hosting" in README.md.
 services:
   - type: web
     name: oxygen-hospital

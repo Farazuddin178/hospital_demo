@@ -1,0 +1,64 @@
+# Apache rules for the static build on GoDaddy (cPanel / Linux hosting).
+# Copied into ./out by `npm run build:static`. On the Node server build the same
+# rules come from next.config.mjs instead, and this file is ignored.
+
+Options -Indexes
+DirectoryIndex index.html
+ErrorDocument 404 /404.html
+
+AddType image/webp .webp
+AddType image/x-icon .ico
+
+# The share-card image is written without an extension; WhatsApp and Facebook
+# ignore it unless it is served as a PNG.
+<Files "opengraph-image">
+  ForceType image/png
+</Files>
+
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+
+  # HTTPS only. Turn on the free SSL certificate in cPanel (SSL/TLS Status)
+  # before uploading, or visitors will see a certificate warning.
+  RewriteCond %{HTTPS} !=on
+  RewriteCond %{HTTP:X-Forwarded-Proto} !=https
+  RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+
+  # Old URL kept working.
+  RewriteRule ^appointment/?$ /book-appointment/ [L,R=301]
+</IfModule>
+
+<IfModule mod_headers.c>
+  # Same policy as the server build. Update both if a third-party script,
+  # map embed or external API is added.
+  Header always set Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-inline' https://www.googletagmanager.com https://www.google-analytics.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' data:; connect-src 'self' https://www.google-analytics.com; frame-ancestors 'self'; base-uri 'self'; form-action 'self';"
+  # One year, this host only. Not includeSubDomains/preload: cPanel subdomains
+  # such as webmail may not all have certificates.
+  Header always set Strict-Transport-Security "max-age=31536000"
+  Header always set X-Content-Type-Options "nosniff"
+  Header always set X-Frame-Options "DENY"
+  Header always set Referrer-Policy "strict-origin-when-cross-origin"
+  Header always set Permissions-Policy "camera=(), microphone=(), geolocation=(self)"
+
+  # Pages: always check for a newer version.
+  <FilesMatch "\.(html|txt|xml)$">
+    Header set Cache-Control "no-cache"
+  </FilesMatch>
+</IfModule>
+
+<IfModule mod_expires.c>
+  ExpiresActive On
+  # Scripts, styles and fonts in /_next/static and photos in /images carry a
+  # content hash or width in their names, so a change means a new file name.
+  ExpiresByType application/javascript "access plus 1 year"
+  ExpiresByType text/css "access plus 1 year"
+  ExpiresByType font/woff2 "access plus 1 year"
+  ExpiresByType image/webp "access plus 1 year"
+  # Logo and icons keep fixed names, so a shorter lifetime.
+  ExpiresByType image/png "access plus 7 days"
+  ExpiresByType image/x-icon "access plus 7 days"
+</IfModule>
+
+<IfModule mod_deflate.c>
+  AddOutputFilterByType DEFLATE text/html text/css text/plain text/xml application/javascript application/json image/svg+xml
+</IfModule>

@@ -4,9 +4,11 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { contactSchema, type ContactInput } from "@/lib/schemas";
+import { siteConfig } from "@/lib/site-data";
+import { submitForm, usesWhatsApp } from "@/lib/submit-form";
 
 export default function ContactForm() {
-  const [status, setStatus] = useState<"idle" | "sending" | "sent" | "error">("idle");
+  const [status, setStatus] = useState<"idle" | "sending" | "sent" | "whatsapp" | "error">("idle");
   const {
     register,
     handleSubmit,
@@ -17,13 +19,17 @@ export default function ContactForm() {
   async function onSubmit(data: ContactInput) {
     setStatus("sending");
     try {
-      const res = await fetch("/api/contact", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(data),
-      });
-      if (!res.ok) throw new Error("Request failed");
-      setStatus("sent");
+      const text = [
+        "Website enquiry",
+        `Name: ${data.firstName} ${data.lastName}`,
+        `Email: ${data.email}`,
+        data.phone ? `Phone: ${data.phone}` : "",
+        "",
+        data.message,
+      ]
+        .filter((line, i) => line !== "" || i === 4)
+        .join("\n");
+      setStatus(await submitForm("contact", data, text));
       reset();
     } catch {
       setStatus("error");
@@ -112,8 +118,15 @@ export default function ContactForm() {
         {isSubmitting ? "Sending…" : "Send Message"}
       </button>
 
+      {usesWhatsApp && (
+        <p className="text-sm text-ink-muted">
+          Your message opens in WhatsApp, addressed to {siteConfig.appointmentsPhone}. Press send there to reach us.
+        </p>
+      )}
+
       <p id="contact-form-status" role="status" aria-live="polite" className="text-sm">
-        {status === "sent" && <span className="text-teal-700 dark:text-teal-300">Thank you — your message has been sent.</span>}
+        {status === "sent" && <span className="text-teal-700 dark:text-teal-300">Thank you. Your message has been sent.</span>}
+        {status === "whatsapp" && <span className="text-teal-700 dark:text-teal-300">WhatsApp has opened with your message. Send it there and we&apos;ll reply.</span>}
         {status === "error" && <span className="text-accent-700">Something went wrong. Please try again.</span>}
       </p>
     </form>

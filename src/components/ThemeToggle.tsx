@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { Moon, Sun } from "lucide-react";
 
 const THEME_EVENT = "theme-changed";
 
@@ -37,7 +38,11 @@ export default function ThemeToggle() {
       aria-pressed={isDark}
       className="grid h-10 w-10 shrink-0 place-items-center rounded-full border border-slate-300 text-ink transition duration-300 hover:-translate-y-0.5 hover:border-brand-400 hover:text-brand-700 dark:border-slate-600 dark:hover:border-brand-400"
     >
-      <span aria-hidden="true">{isDark ? "☀️" : "🌙"}</span>
+      {isDark ? (
+        <Sun className="h-[18px] w-[18px]" strokeWidth={1.8} aria-hidden="true" />
+      ) : (
+        <Moon className="h-[18px] w-[18px]" strokeWidth={1.8} aria-hidden="true" />
+      )}
     </button>
   );
 }

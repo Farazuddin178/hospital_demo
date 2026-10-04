@@ -51,12 +51,12 @@ export default function PrivacyPolicyPage() {
       <h2>6. Your Rights</h2>
       <p>
         You may request access to, correction of, or deletion of your personal
-        data by contacting us at {siteConfig.emailAdmin}.
+        data by calling us on {siteConfig.phonePrimary}.
       </p>
 
       <h2>7. Contact Us</h2>
       <p>
-        Questions about this policy can be sent to {siteConfig.emailAdmin} or {siteConfig.address}.
+        Questions about this policy can be raised by phone on {siteConfig.phonePrimary}, or in writing at {siteConfig.hospitalName}, {siteConfig.address}.
       </p>
     </div>
   );

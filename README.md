@@ -170,3 +170,41 @@ with the image rather than being retyped at each call site.
 
 Photos currently come from Unsplash. Swap the ids in that array for licensed
 photography before launch.
+
+## Hosting
+
+One codebase, two builds:
+
+| Command | Output | Use it for |
+|---|---|---|
+| `npm run build` then `npm start` | Node server | Render (`render.yaml`), or any host once the backend is in use. API routes, middleware and security headers all run. |
+| `npm run build:static` | Plain files in `./out` | GoDaddy shared hosting (cPanel / Linux). No server. |
+
+Server-only code stays in the repo for later: `src/middleware.server.ts` and
+`src/app/api/**/route.server.ts`. Only the server build includes `.server.ts` files
+(see `pageExtensions` in `next.config.mjs`), so the static build skips them.
+`public/.htaccess` handles HTTPS, security headers, caching and the 404 page on Apache.
+
+### Forms on the static build
+
+There is no server on GoDaddy, so the contact and appointment forms open WhatsApp
+with the request filled in, addressed to the appointments number in
+`src/lib/site-data.ts`. Once a backend exists, set `NEXT_PUBLIC_API_URL` to it (it
+must accept `POST /contact` and `POST /book-appointment` with the same JSON the API
+routes take). The forms then post there instead.
+
+### GitHub to GoDaddy
+
+`.github/workflows/deploy-godaddy.yml` runs on every push to `main`. It builds the
+static site and uploads `out/` over FTP. Until the FTP secrets are set it only builds.
+
+1. In cPanel, turn on SSL for the domain (SSL/TLS Status) and create an FTP account
+   (FTP Accounts) with access to `public_html`.
+2. In GitHub: Settings > Secrets and variables > Actions. Add the secrets `FTP_SERVER`,
+   `FTP_USERNAME` and `FTP_PASSWORD`. Add the variable `SITE_URL`, for example
+   `https://www.yourdomain.com`.
+3. Push to `main`, or run the workflow from the Actions tab.
+
+If FTPS is refused, set the variable `FTP_PROTOCOL` to `ftp`. To upload by hand
+instead, run `npm run build:static` and upload the contents of `out/` (including the
+hidden `.htaccess`) to `public_html` with cPanel File Manager.

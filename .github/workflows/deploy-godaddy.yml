@@ -1,0 +1,61 @@
+# Builds the static site and uploads it to GoDaddy hosting over FTP on every
+# push to main. Until the FTP secrets below are added, it only builds, which
+# still catches a broken build before anyone uploads it by hand.
+#
+# Repository > Settings > Secrets and variables > Actions:
+#   Secrets:   FTP_SERVER     e.g. ftp.yourdomain.com (cPanel > FTP Accounts)
+#              FTP_USERNAME
+#              FTP_PASSWORD
+#   Variables: SITE_URL       e.g. https://www.yourdomain.com (optional)
+#              FTP_SERVER_DIR defaults to /public_html/
+#              FTP_PROTOCOL   ftps (default) or ftp if FTPS is refused
+#              GA_ID          Google Analytics ID (optional)
+#              API_URL        a backend for the forms, once one exists (optional)
+
+name: Deploy to GoDaddy
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: godaddy-deploy
+  cancel-in-progress: false
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    env:
+      FTP_CONFIGURED: ${{ secrets.FTP_SERVER != '' }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 18
+          cache: npm
+
+      - run: npm ci
+
+      - name: Build static site
+        run: npm run build:static
+        env:
+          NEXT_PUBLIC_SITE_URL: ${{ vars.SITE_URL }}
+          NEXT_PUBLIC_GA_ID: ${{ vars.GA_ID }}
+          NEXT_PUBLIC_API_URL: ${{ vars.API_URL }}
+
+      - name: Upload to GoDaddy
+        if: env.FTP_CONFIGURED == 'true'
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+        with:
+          server: ${{ secrets.FTP_SERVER }}
+          username: ${{ secrets.FTP_USERNAME }}
+          password: ${{ secrets.FTP_PASSWORD }}
+          protocol: ${{ vars.FTP_PROTOCOL || 'ftps' }}
+          local-dir: ./out/
+          server-dir: ${{ vars.FTP_SERVER_DIR || '/public_html/' }}
+
+      - name: Upload skipped
+        if: env.FTP_CONFIGURED != 'true'
+        run: echo "::notice::Built ./out but did not upload. Add the FTP_SERVER, FTP_USERNAME and FTP_PASSWORD secrets to deploy to GoDaddy."

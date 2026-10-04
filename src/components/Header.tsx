@@ -55,16 +55,18 @@ function Logo() {
     // sticky header wider than the viewport on narrow phones; only the mark
     // (the icon) is pinned with shrink-0, since that one must stay full size.
     <Link href="/" className="flex min-w-0 items-center gap-2.5 sm:gap-3" aria-label={`${siteConfig.name} home`}>
-      <span
-        aria-hidden="true"
-        className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-brand-700 text-white sm:h-10 sm:w-10"
-      >
-        <svg viewBox="0 0 32 32" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" className="h-4 w-4 sm:h-5 sm:w-5">
-          <path d="M4.5 22.5h23" />
-          <path d="M8.5 22.5a7.5 7.5 0 0 1 15 0" />
-          <path d="M16 9V5.5M9.6 11.6 7.2 9.2M22.4 11.6l2.4-2.4" />
-        </svg>
-      </span>
+      {/* The official shield logo. Eager and high priority: it is above the fold
+          on every page. The wordmark stays beside it because the lettering inside
+          the shield is too small to read at header size. */}
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img
+        src={siteConfig.logo}
+        alt=""
+        width={151}
+        height={176}
+        fetchPriority="high"
+        className="h-10 w-auto shrink-0 sm:h-12"
+      />
       <span className="truncate font-display text-base font-semibold leading-none tracking-tight text-ink sm:text-[1.3rem]">
         {siteConfig.name}
       </span>
@@ -129,36 +131,6 @@ export default function Header() {
       ref={headerRef}
       className="sticky top-0 z-50 border-b border-[rgb(var(--hairline))] bg-surface/90 backdrop-blur-md"
     >
-      {/* Utility strip: the two things people arrive in a hurry for. */}
-      <div className="hidden border-b border-[rgb(var(--hairline))] lg:block">
-        <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-2 text-[0.8125rem] lg:px-8">
-          <p className="flex items-center gap-2 text-ink-muted">
-            <span className="relative flex h-2 w-2" aria-hidden="true">
-              <span className="absolute inline-flex h-full w-full rounded-full bg-accent-400 opacity-60" />
-              <span className="relative inline-flex h-2 w-2 rounded-full bg-accent-600" />
-            </span>
-            <span className="font-medium text-ink">{emergency.label}</span>
-            <a href={`tel:${emergency.phone.replace(/\s/g, "")}`} className="link-quiet font-semibold">
-              {emergency.phone}
-            </a>
-          </p>
-          <nav aria-label="Utility" className="flex items-center gap-7 text-ink-muted">
-            <Link href="/patients#portal" className="transition-colors hover:text-brand-700">
-              Patient portal
-            </Link>
-            <Link href="/specialties" className="transition-colors hover:text-brand-700">
-              Find a doctor
-            </Link>
-            <Link href="/about" className="transition-colors hover:text-brand-700">
-              About us
-            </Link>
-            <Link href="/contact" className="transition-colors hover:text-brand-700">
-              Contact
-            </Link>
-          </nav>
-        </div>
-      </div>
-
       <div className="mx-auto flex max-w-7xl items-center justify-between gap-3 px-4 py-3 sm:gap-6 sm:px-6 sm:py-3.5 lg:px-8">
         <Logo />
 
@@ -209,6 +181,9 @@ export default function Header() {
                                       className="-mx-2 block rounded-lg px-2 py-1.5 text-[0.9375rem] text-ink-muted transition-colors duration-200 hover:bg-brand-50 hover:text-brand-700 dark:hover:bg-white/5"
                                     >
                                       {item.label}
+                                      {item.detail && (
+                                        <span className="mt-0.5 block text-[0.8125rem] text-ink-muted">{item.detail}</span>
+                                      )}
                                     </Link>
                                   </li>
                                 ))}
@@ -300,6 +275,7 @@ export default function Header() {
                                     <li key={item.href + item.label}>
                                       <Link href={item.href} className="block py-1.5 text-[0.9375rem] text-ink-muted">
                                         {item.label}
+                                        {item.detail && <span className="block text-[0.8125rem]">{item.detail}</span>}
                                       </Link>
                                     </li>
                                   ))}

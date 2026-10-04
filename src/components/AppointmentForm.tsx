@@ -4,10 +4,11 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { appointmentSchema, type AppointmentInput } from "@/lib/schemas";
-import { specialties } from "@/lib/site-data";
+import { siteConfig, specialties } from "@/lib/site-data";
+import { submitForm, usesWhatsApp } from "@/lib/submit-form";
 
 export default function AppointmentForm() {
-  const [status, setStatus] = useState<"idle" | "sending" | "sent" | "error">("idle");
+  const [status, setStatus] = useState<"idle" | "sending" | "sent" | "whatsapp" | "error">("idle");
   const {
     register,
     handleSubmit,
@@ -18,13 +19,18 @@ export default function AppointmentForm() {
   async function onSubmit(data: AppointmentInput) {
     setStatus("sending");
     try {
-      const res = await fetch("/api/book-appointment", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(data),
-      });
-      if (!res.ok) throw new Error("Request failed");
-      setStatus("sent");
+      const text = [
+        "Appointment request",
+        `Name: ${data.fullName}`,
+        `Phone: ${data.phone}`,
+        `Email: ${data.email}`,
+        `Department: ${data.department}`,
+        `Preferred date: ${data.preferredDate}`,
+        data.notes ? `Notes: ${data.notes}` : "",
+      ]
+        .filter(Boolean)
+        .join("\n");
+      setStatus(await submitForm("book-appointment", data, text));
       reset();
     } catch {
       setStatus("error");
@@ -130,8 +136,15 @@ export default function AppointmentForm() {
         {isSubmitting ? "Submitting…" : "Request Appointment"}
       </button>
 
+      {usesWhatsApp && (
+        <p className="text-sm text-ink-muted">
+          Your request opens in WhatsApp, addressed to {siteConfig.appointmentsPhone}. Press send there to reach us.
+        </p>
+      )}
+
       <p id="appointment-form-status" role="status" aria-live="polite" className="text-sm">
-        {status === "sent" && <span className="text-teal-700 dark:text-teal-300">Thank you — we&apos;ll contact you shortly to confirm.</span>}
+        {status === "sent" && <span className="text-teal-700 dark:text-teal-300">Thank you. We&apos;ll contact you shortly to confirm.</span>}
+        {status === "whatsapp" && <span className="text-teal-700 dark:text-teal-300">WhatsApp has opened with your request. Send the message there and we&apos;ll confirm your appointment.</span>}
         {status === "error" && <span className="text-accent-700">Something went wrong. Please try again.</span>}
       </p>
     </form>

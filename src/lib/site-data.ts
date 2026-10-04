@@ -27,14 +27,26 @@ import {
 
 export const siteConfig = {
   name: "Oxygen Hospital",
+  // Registered name as printed on official hospital letterhead.
+  legalName: "Oxygen Group of Hospitals",
+  // Name the hospital uses for each branch.
+  hospitalName: "Oxygen Multi Specialty Hospital",
   tagline: "Your Health, Our Priority",
-  url: "https://www.oxygenhospital.example",
-  phonePrimary: "+91 9100-100812",
-  phoneSecondary: "+91 9100-500812",
+  // Set NEXT_PUBLIC_SITE_URL once the domain is bought; canonical URLs, the
+  // sitemap and share cards all read it.
+  url: process.env.NEXT_PUBLIC_SITE_URL || "https://www.oxygenhospital.example",
+  // Chandrayangutta branch (primary) and Falaknuma branch, per letterhead.
+  phonePrimary: "040-24443631",
+  phoneSecondary: "+91 97001 73631",
+  // The hospital asked for the Falaknuma mobile on the booking and patient pages.
+  // Online requests also go to this number on WhatsApp until a backend exists.
+  appointmentsPhone: "+91 97001 73631",
+  // Placeholders until the domain is bought; not shown anywhere on the site.
   emailAdmin: "admin@oxygenhospital.example",
   emailSupport: "patient-support@oxygenhospital.example",
-  address: "8-4-120/4, Example Road, Hyderabad, Telangana, IN",
+  address: "Beside Ruman Hotel, Chandrayangutta, Hyderabad, Telangana",
   hours: "Open 24/7 · All Week Days",
+  logo: "/logo.png",
   social: {
     facebook: "https://facebook.com",
     twitter: "https://twitter.com",
@@ -43,7 +55,7 @@ export const siteConfig = {
   },
 };
 
-export type NavItem = { label: string; href: string };
+export type NavItem = { label: string; href: string; /** Optional second line, e.g. an area name. */ detail?: string };
 
 export const primaryNav: NavItem[] = [
   { label: "Home", href: "/" },

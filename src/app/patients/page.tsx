@@ -238,8 +238,8 @@ export default function PatientsPage() {
               </p>
               <p className="mt-4 text-sm text-ink-muted">
                 {emergency.label}:{" "}
-                <a href={`tel:${emergency.phone.replace(/\s/g, "")}`} className="link-quiet font-semibold">
-                  {emergency.phone}
+                <a href={`tel:${siteConfig.appointmentsPhone.replace(/\s/g, "")}`} className="link-quiet font-semibold">
+                  {siteConfig.appointmentsPhone}
                 </a>
               </p>
             </div>

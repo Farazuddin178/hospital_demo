@@ -1,31 +1,34 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { ArrowRight, Check, MapPin, Phone, Quote } from "lucide-react";
+import { ArrowRight, BedDouble, MapPin, Phone } from "lucide-react";
 
 import HeroSearch from "@/components/HeroSearch";
-import Photo, { type PhotoName } from "@/components/Photo";
+import Photo from "@/components/Photo";
 import { siteConfig, specialties } from "@/lib/site-data";
 import {
   acceptedInsurers,
-  articles,
   buildSearchIndex,
   carePrinciples,
   emergency,
-  featuredProviders,
   locations,
   quickActions,
   searchSuggestions,
   stats,
-  testimonial,
-  trustMarkers,
 } from "@/lib/home-content";
 
 export const metadata: Metadata = {
   title: `${siteConfig.name} | ${siteConfig.tagline}`,
   description:
-    "Search a symptom, specialty, doctor, or location and get to the right care in one step. Four Hyderabad campuses, 17 specialties, 24/7 emergency cover.",
+    "Search a symptom, specialty, doctor, or location and get to the right care in one step. Oxygen Multi Specialty Hospital, with two Hyderabad branches at Chandrayangutta and Falaknuma.",
   alternates: { canonical: "/" },
 };
+
+// The specialty grid is 2 columns on tablets and 3 on desktop. Stretch the last
+// tile across whatever the final row leaves empty, so no blank cell shows.
+const lastCellSpan = [
+  specialties.length % 2 === 1 ? "sm:col-span-2" : "",
+  specialties.length % 3 === 1 ? "lg:col-span-3" : specialties.length % 3 === 2 ? "lg:col-span-2" : "lg:col-span-1",
+].join(" ");
 
 const tel = (value: string) => `tel:${value.replace(/\s/g, "")}`;
 const mapsHref = (query: string) =>
@@ -44,7 +47,7 @@ export default function HomePage() {
       <section className="bg-hero-gradient">
         <div className="mx-auto max-w-7xl px-6 pb-24 pt-16 text-center sm:pt-20 lg:px-8 lg:pb-32 lg:pt-24">
           <p className="flex items-center justify-center">
-            <span className="eyebrow">Four campuses across Hyderabad</span>
+            <span className="eyebrow">Chandrayangutta and Falaknuma, Hyderabad</span>
           </p>
 
           <h1 className="mx-auto mt-6 max-w-4xl text-balance font-display text-[2.5rem] font-semibold leading-[1.08] text-ink sm:text-5xl lg:text-6xl">
@@ -62,14 +65,6 @@ export default function HomePage() {
             <HeroSearch index={index} suggestions={searchSuggestions} />
           </div>
 
-          <ul className="mt-14 flex flex-wrap items-center justify-center gap-x-8 gap-y-3 text-sm text-ink-muted">
-            {trustMarkers.map((marker) => (
-              <li key={marker} className="flex items-center gap-2">
-                <Check className="h-4 w-4 text-teal-700" aria-hidden="true" />
-                {marker}
-              </li>
-            ))}
-          </ul>
         </div>
       </section>
 
@@ -185,8 +180,7 @@ export default function HomePage() {
         <div className="mx-auto max-w-7xl px-6 lg:px-8">
           <div className="flex flex-wrap items-end justify-between gap-6">
             <div>
-              <span className="eyebrow">Conditions &amp; treatments</span>
-              <h2 className="section-title">Care for every stage of life</h2>
+              <h2 className="section-title !mt-0">Care for every stage of life</h2>
               <p className="section-lede">
                 Seventeen specialties, one shared record. If you are not sure which one you
                 need, search a symptom instead and we will route you.
@@ -199,8 +193,8 @@ export default function HomePage() {
           </div>
 
           <ul className="mt-12 grid grid-cols-1 gap-px overflow-hidden rounded-3xl border border-[rgb(var(--hairline))] bg-[rgb(var(--hairline))] sm:grid-cols-2 lg:grid-cols-3">
-            {specialties.map(({ slug, name, summary, Icon }) => (
-              <li key={slug} className="bg-surface">
+            {specialties.map(({ slug, name, summary, Icon }, i) => (
+              <li key={slug} className={`bg-surface ${i === specialties.length - 1 ? lastCellSpan : ""}`}>
                 <Link
                   href={`/specialties/${slug}`}
                   className="group flex h-full items-start gap-4 p-6 transition-colors duration-300 ease-calm hover:bg-brand-50/60 dark:hover:bg-white/5"
@@ -224,57 +218,13 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* ================= Care team ========================================= */}
-      <section id="providers" className="defer-paint bg-surface-alt py-20 lg:py-28">
-        <div className="mx-auto max-w-7xl px-6 lg:px-8">
-          <div className="flex flex-wrap items-end justify-between gap-6">
-            <div>
-              <span className="eyebrow">Your care team</span>
-              <h2 className="section-title">The people you will actually meet</h2>
-              <p className="section-lede">
-                Every consultant here sees patients weekly. Languages are listed because being
-                understood is part of the treatment.
-              </p>
-            </div>
-            <Link href="/specialties" className="link-arrow shrink-0">
-              Browse all 240+ doctors
-              <ArrowRight className="h-4 w-4" aria-hidden="true" />
-            </Link>
-          </div>
-
-          <ul className="mt-12 grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
-            {featuredProviders.map((provider) => (
-              <li key={provider.name}>
-                <Link href={`/specialties/${provider.specialtySlug}`} className="group block">
-                  <Photo
-                    name={provider.image as PhotoName}
-                    alt={`Portrait of ${provider.name}, ${provider.role}`}
-                    sizes="(min-width: 1024px) 22vw, (min-width: 640px) 44vw, 88vw"
-                    className="aspect-square w-full rounded-2xl object-cover transition duration-500 ease-calm group-hover:brightness-105"
-                  />
-                  <h3 className="mt-5 font-display text-lg text-ink">{provider.name}</h3>
-                  <p className="mt-1 text-sm font-medium text-brand-700 dark:text-brand-300">
-                    {provider.role}
-                  </p>
-                  <p className="mt-2 text-sm text-ink-muted">Speaks {provider.languages}</p>
-                </Link>
-              </li>
-            ))}
-          </ul>
-        </div>
-      </section>
-
       {/* ================= Locations ========================================= */}
       <section id="locations" className="defer-paint bg-surface py-20 lg:py-28">
         <div className="mx-auto max-w-7xl px-6 lg:px-8">
           <div className="flex flex-wrap items-end justify-between gap-6">
             <div>
-              <span className="eyebrow">Locations</span>
-              <h2 className="section-title">Find care near you</h2>
-              <p className="section-lede">
-                Four campuses across Hyderabad. Two run a 24/7 emergency department, and wait
-                times are published rather than guessed at.
-              </p>
+              <h2 className="section-title !mt-0">Find care near you</h2>
+              <p className="section-lede">Two branches in Hyderabad, at Chandrayangutta and Falaknuma.</p>
             </div>
             <Link href="/locations" className="link-arrow shrink-0">
               All locations and directions
@@ -286,124 +236,43 @@ export default function HomePage() {
             {locations.map((location) => (
               <li
                 key={location.slug}
-                className="flex flex-col gap-5 rounded-3xl border border-[rgb(var(--hairline))] p-7 transition duration-300 ease-calm hover:border-brand-300 hover:shadow-soft sm:flex-row sm:items-start"
+                className="flex flex-col rounded-3xl border border-[rgb(var(--hairline))] p-7 transition duration-300 ease-calm hover:border-brand-300 hover:shadow-soft sm:p-8"
               >
-                <div className="min-w-0 flex-1">
-                  <div className="flex flex-wrap items-center gap-3">
-                    <h3 className="font-display text-xl text-ink">{location.name}</h3>
-                    <span className="rounded-full bg-brand-50 px-2.5 py-1 text-xs font-semibold text-brand-700 dark:bg-white/5">
-                      {location.kind}
+                <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
+                  <h3 className="font-display text-xl text-ink">{location.name}</h3>
+                  {location.tag && (
+                    <span className="rounded-full bg-brand-50 px-2.5 py-1 text-xs font-semibold text-brand-700 dark:bg-white/5 dark:text-brand-200">
+                      {location.tag}
                     </span>
-                  </div>
-
-                  <p className="mt-3 flex items-start gap-2 text-sm leading-relaxed text-ink-muted">
-                    <MapPin className="mt-0.5 h-4 w-4 shrink-0" strokeWidth={1.7} aria-hidden="true" />
-                    {location.address}
-                  </p>
-
-                  <ul className="mt-4 flex flex-wrap gap-x-4 gap-y-2 text-sm text-ink-muted">
-                    {location.highlights.map((highlight) => (
-                      <li key={highlight} className="flex items-center gap-1.5">
-                        <Check className="h-3.5 w-3.5 text-teal-700" aria-hidden="true" />
-                        {highlight}
-                      </li>
-                    ))}
-                  </ul>
-
-                  <div className="mt-5 flex flex-wrap items-center gap-x-5 gap-y-2 text-sm">
-                    <a href={tel(location.phone)} className="link-arrow">
-                      <Phone className="h-4 w-4" strokeWidth={1.7} aria-hidden="true" />
-                      {location.phone}
-                    </a>
-                    <a
-                      href={mapsHref(`${location.name}, ${location.address}`)}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="link-quiet"
-                    >
-                      Get directions
-                    </a>
-                  </div>
+                  )}
                 </div>
 
-                <div className="shrink-0 rounded-2xl bg-surface-alt px-5 py-4 text-center sm:w-36">
-                  <p className="text-xs font-semibold uppercase tracking-[0.12em] text-ink-muted">
-                    {location.hasEmergency ? "Emergency wait" : "Walk-in wait"}
+                <p className="mt-4 flex items-start gap-2.5 leading-relaxed text-ink-muted">
+                  <MapPin className="mt-1 h-4 w-4 shrink-0" strokeWidth={1.7} aria-hidden="true" />
+                  {location.address}
+                </p>
+
+                {location.highlights.map((highlight) => (
+                  <p key={highlight} className="mt-2.5 flex items-center gap-2.5 text-ink-muted">
+                    <BedDouble className="h-4 w-4 shrink-0" strokeWidth={1.7} aria-hidden="true" />
+                    {highlight}
                   </p>
-                  <p className="mt-1.5 font-display text-2xl font-semibold text-ink">
-                    {location.waitMinutes === null ? "By appt" : `${location.waitMinutes} min`}
-                  </p>
-                  <p className="mt-1 text-xs leading-snug text-ink-muted">{location.hours}</p>
+                ))}
+
+                <div className="mt-auto flex flex-wrap items-center gap-x-6 gap-y-3 pt-6">
+                  <a href={tel(location.phone)} className="link-arrow">
+                    <Phone className="h-4 w-4" strokeWidth={1.7} aria-hidden="true" />
+                    {location.phone}
+                  </a>
+                  <a
+                    href={mapsHref(`${location.name}, ${location.address}`)}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="link-quiet text-sm"
+                  >
+                    Get directions
+                  </a>
                 </div>
-              </li>
-            ))}
-          </ul>
-        </div>
-      </section>
-
-      {/* ================= Patient story ===================================== */}
-      <section className="defer-paint bg-surface-alt py-20 lg:py-28">
-        <div className="mx-auto grid max-w-7xl items-center gap-12 px-6 lg:grid-cols-12 lg:gap-16 lg:px-8">
-          <figure className="lg:col-span-7 lg:order-2">
-            <Quote className="h-9 w-9 text-accent-300" strokeWidth={1.4} aria-hidden="true" />
-            <blockquote className="mt-6 font-display text-2xl leading-[1.45] text-ink sm:text-[1.75rem]">
-              {testimonial.quote}
-            </blockquote>
-            <figcaption className="mt-7 text-ink-muted">
-              <span className="font-semibold text-ink">{testimonial.name}</span>
-              <span className="mx-2 text-[rgb(var(--hairline))]">/</span>
-              {testimonial.detail}
-            </figcaption>
-          </figure>
-
-          <div className="lg:col-span-5 lg:order-1">
-            <Photo
-              name="patient-story"
-              sizes="(min-width: 1024px) 40vw, 100vw"
-              className="w-full rounded-3xl object-cover"
-            />
-          </div>
-        </div>
-      </section>
-
-      {/* ================= Health library ==================================== */}
-      <section className="defer-paint bg-surface py-20 lg:py-28">
-        <div className="mx-auto max-w-7xl px-6 lg:px-8">
-          <div className="flex flex-wrap items-end justify-between gap-6">
-            <div>
-              <span className="eyebrow">Health library</span>
-              <h2 className="section-title">Written by the people who treat it</h2>
-              <p className="section-lede">
-                Plain-language guidance from our own consultants. No jargon, no hedging, and
-                no advice we would not give in the room.
-              </p>
-            </div>
-          </div>
-
-          <ul className="mt-12 grid gap-8 md:grid-cols-3">
-            {articles.map((article) => (
-              <li key={article.title}>
-                <Link href={article.href} className="group block">
-                  <Photo
-                    name={article.image as PhotoName}
-                    alt=""
-                    sizes="(min-width: 768px) 30vw, 90vw"
-                    className="aspect-[3/2] w-full rounded-2xl object-cover"
-                  />
-                  <p className="mt-5 flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.12em] text-accent-600">
-                    {article.category}
-                    <span className="text-[rgb(var(--hairline))]" aria-hidden="true">
-                      /
-                    </span>
-                    <span className="font-normal normal-case tracking-normal text-ink-muted">
-                      {article.readingTime}
-                    </span>
-                  </p>
-                  <h3 className="mt-2.5 font-display text-xl leading-snug text-ink transition-colors duration-300 group-hover:text-brand-700">
-                    {article.title}
-                  </h3>
-                  <p className="mt-2.5 leading-relaxed text-ink-muted">{article.excerpt}</p>
-                </Link>
               </li>
             ))}
           </ul>
@@ -438,7 +307,7 @@ export default function HomePage() {
       <section className="defer-paint bg-ink-band">
         <div className="mx-auto max-w-7xl px-6 py-20 text-center lg:px-8 lg:py-28">
           <h2 className="mx-auto max-w-2xl text-balance font-display text-3xl leading-tight text-white sm:text-4xl lg:text-[2.75rem]">
-            Ready when you need us, and honest about the wait when you do.
+            Ready when you need us, day or night.
           </h2>
           <p className="mx-auto mt-5 max-w-xl text-lg leading-relaxed text-brand-100">
             Request an appointment online and we will confirm within one working day.
