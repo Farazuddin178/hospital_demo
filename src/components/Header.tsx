@@ -6,6 +6,7 @@ import { usePathname } from "next/navigation";
 import { siteConfig } from "@/lib/site-data";
 import { emergency, megaMenus } from "@/lib/home-content";
 import ThemeToggle from "@/components/ThemeToggle";
+import { Phone } from "lucide-react";
 
 /**
  * Navigation used to be built on native <details>/<summary> for zero-JS,
@@ -301,7 +302,8 @@ export default function Header() {
                   <div className="mt-6 flex items-center justify-between gap-4 rounded-2xl bg-accent-50 p-4 dark:bg-white/[0.04]">
                     <div>
                       <p className="text-sm font-semibold text-ink">{emergency.label}</p>
-                      <a href={`tel:${emergency.phone.replace(/\s/g, "")}`} className="text-sm text-ink-muted">
+                      <a href={`tel:${emergency.phone.replace(/\s/g, "")}`} className="flex items-center gap-1.5 text-sm text-ink-muted">
+                        <Phone className="h-3.5 w-3.5" strokeWidth={1.8} aria-hidden="true" />
                         {emergency.phone}
                       </a>
                     </div>

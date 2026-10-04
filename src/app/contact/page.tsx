@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { Mail, MapPin, Phone } from "lucide-react";
 import ContactForm from "@/components/ContactForm";
 import { siteConfig } from "@/lib/site-data";
 import { locations } from "@/lib/home-content";
@@ -30,8 +31,12 @@ export default function ContactPage() {
           <h2 className="text-lg text-ink">Visit or Call Us</h2>
           <address className="card mt-4 break-words not-italic leading-relaxed text-ink-muted">
             <p className="font-display text-lg font-semibold text-ink">{mainHospital.name}</p>
-            <p className="mt-3">{mainHospital.address}</p>
-            <p className="mt-3">
+            <p className="mt-3 flex items-start gap-2.5">
+              <MapPin className="mt-1 h-4 w-4 shrink-0" strokeWidth={1.8} aria-hidden="true" />
+              {mainHospital.address}
+            </p>
+            <p className="mt-3 flex items-center gap-2.5">
+              <Phone className="h-4 w-4 shrink-0" strokeWidth={1.8} aria-hidden="true" />
               <a
                 href={`tel:${mainHospital.phone.replace(/\s/g, "")}`}
                 className="font-semibold text-brand-700 dark:text-brand-300"
@@ -39,7 +44,8 @@ export default function ContactPage() {
                 {mainHospital.phone}
               </a>
             </p>
-            <p className="mt-1">
+            <p className="mt-2 flex items-center gap-2.5">
+              <Mail className="h-4 w-4 shrink-0" strokeWidth={1.8} aria-hidden="true" />
               <a href={`mailto:${siteConfig.email}`} className="font-semibold text-brand-700 dark:text-brand-300">
                 {siteConfig.email}
               </a>

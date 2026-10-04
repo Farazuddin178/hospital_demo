@@ -4,6 +4,7 @@ import { ArrowRight, BedDouble, Mail, MapPin, Phone } from "lucide-react";
 
 import HeroSearch from "@/components/HeroSearch";
 import SunsetHero from "@/components/SunsetHero";
+import AmbulanceBanner from "@/components/AmbulanceBanner";
 import Photo from "@/components/Photo";
 import { siteConfig, specialties } from "@/lib/site-data";
 import {
@@ -71,6 +72,9 @@ export default function HomePage() {
           </div>
         </div>
       </SunsetHero>
+
+      {/* ================= Emergency and ambulance =========================== */}
+      <AmbulanceBanner />
 
       {/* ================= Photography band ================================== */}
       <section>

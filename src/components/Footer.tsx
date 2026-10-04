@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { Mail, MapPin, Phone } from "lucide-react";
 import { siteConfig, specialties } from "@/lib/site-data";
 import { locations, patientResourceColumns, trustMarkers } from "@/lib/home-content";
 
@@ -99,16 +100,21 @@ export default function Footer() {
 
         <div className="col-span-2 lg:col-span-3">
           <p className="text-sm font-semibold text-white">Contact</p>
-          <address className="mt-4 text-sm not-italic leading-relaxed text-brand-200">
+          <address className="mt-4 space-y-2.5 text-sm not-italic leading-relaxed text-brand-200">
             <span className="block font-semibold text-white">{mainHospital.name}</span>
-            <span className="mt-1 block">{mainHospital.address}</span>
+            <span className="flex items-start gap-2.5">
+              <MapPin className="mt-1 h-4 w-4 shrink-0 text-brand-300" strokeWidth={1.8} aria-hidden="true" />
+              {mainHospital.address}
+            </span>
             <a
               href={`tel:${mainHospital.phone.replace(/[\s-]/g, "")}`}
-              className="mt-1 inline-block transition-colors hover:text-white"
+              className="flex items-center gap-2.5 transition-colors hover:text-white"
             >
+              <Phone className="h-4 w-4 shrink-0 text-brand-300" strokeWidth={1.8} aria-hidden="true" />
               {mainHospital.phone}
             </a>
-            <a href={`mailto:${siteConfig.email}`} className="mt-1 block transition-colors hover:text-white">
+            <a href={`mailto:${siteConfig.email}`} className="flex items-center gap-2.5 transition-colors hover:text-white">
+              <Mail className="h-4 w-4 shrink-0 text-brand-300" strokeWidth={1.8} aria-hidden="true" />
               {siteConfig.email}
             </a>
           </address>
