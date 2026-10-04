@@ -124,7 +124,18 @@ function send_and_respond(string $subject, array $lines, string $replyTo): void
     $body = implode("\n", $lines) . "\n\nSent from the form on " . (ALLOWED_HOSTS[0]) . ' at ' . gmdate('Y-m-d H:i') . " UTC.\n";
     $encodedSubject = '=?UTF-8?B?' . base64_encode(one_line($subject)) . '?=';
 
-    $sent = mail(MAIL_TO, $encodedSubject, $body, implode("\r\n", $headers), '-f' . MAIL_FROM);
+    $headerBlock = implode("\r\n", $headers);
+    // Setting the envelope sender (-f) keeps SPF aligned, but some shared
+    // hosts refuse it; fall back to the host's default sender if so.
+    $sent = @mail(MAIL_TO, $encodedSubject, $body, $headerBlock, '-f' . MAIL_FROM);
+    if (!$sent) {
+        $first = error_get_last()['message'] ?? 'unknown';
+        $sent = @mail(MAIL_TO, $encodedSubject, $body, $headerBlock);
+        if (!$sent) {
+            // Visible in cPanel > Metrics > Errors, never to the visitor.
+            error_log('[website form] mail() failed. With -f: ' . $first . ' | without -f: ' . (error_get_last()['message'] ?? 'unknown'));
+        }
+    }
     if (!$sent) {
         respond(502, ['error' => 'Could not send right now.']);
     }
