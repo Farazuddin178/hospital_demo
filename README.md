@@ -189,11 +189,24 @@ after AutoSSL has issued the certificate.
 
 ### Forms on the static build
 
-There is no server on GoDaddy, so the contact and appointment forms open WhatsApp
-with the request filled in, addressed to the appointments number in
-`src/lib/site-data.ts`. Once a backend exists, set `NEXT_PUBLIC_API_URL` to it (it
-must accept `POST /contact` and `POST /book-appointment` with the same JSON the API
-routes take). The forms then post there instead.
+On GoDaddy the contact and appointment forms post to `public/api/*.php`, which
+email each submission to info@oxygen-hospital.com (GoDaddy Professional Email).
+GoDaddy's cPanel hosting blocks website code from reaching outside mail servers,
+so the mailer hands messages to the hosting account's own mail server
+(`localhost:25`), which passes them on to Professional Email. Two cPanel settings
+make that work:
+
+- **Email Routing** for `oxygen-hospital.com` set to **Remote Mail Exchanger**.
+- The SPF record includes the hosting server: `v=spf1 ip4:118.139.182.121 include:secureserver.net -all`.
+
+The mailbox password (GitHub secret `SMTP_PASSWORD`) is only used if the site
+moves to a host that allows outside mail connections. See the comments at the top
+of `public/api/_mailer.php` for the order it tries routes in and how to read its
+diagnostics. If sending fails, the form offers the phone number and a pre-filled
+WhatsApp message instead.
+
+To point the forms at a separate backend later, set `NEXT_PUBLIC_API_URL`; it must
+accept `POST /contact` and `POST /book-appointment` with the same JSON.
 
 ### GitHub to GoDaddy
 

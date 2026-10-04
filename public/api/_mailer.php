@@ -7,10 +7,14 @@
  *
  * Sending tries these routes in order and stops at the first that works. The
  * route that last worked is tried first next time.
- *   1. GoDaddy Professional Email's outgoing server, signed in as info@
- *      (smtpout.secureserver.net, port 465, then 587). Needs the settings file.
- *   2. The hosting account's own mail server on localhost:25, which is how
- *      GoDaddy documents sending from websites on cPanel hosting.
+ *   1. The hosting account's own mail server on localhost:25, which is how
+ *      GoDaddy documents sending from websites on cPanel hosting. It passes
+ *      the message on to info@ at GoDaddy Professional Email. (Verified on
+ *      this account in October 2026: this is the route that works.)
+ *   2. GoDaddy Professional Email's outgoing server, signed in as info@
+ *      (smtpout.secureserver.net, port 465, then 587). Needs the settings
+ *      file. GoDaddy's cPanel hosting currently blocks these connections, so
+ *      this only helps if the site moves to a host that allows them.
  *   3. PHP's mail().
  *
  * Every failure is written to the PHP error log (cPanel > Metrics > Errors).
@@ -175,6 +179,7 @@ function mail_config(): ?array
 /** The routes to try, in order. */
 function mail_routes(?array $config): array
 {
+    $local = ['label' => 'localhost 25', 'host' => 'localhost', 'port' => 25, 'secure' => 'plain', 'auth' => null];
     $routes = [];
     $fallbacks = true;
     if ($config !== null) {
@@ -190,12 +195,13 @@ function mail_routes(?array $config): array
             $fallbacks = ($config['fallbacks'] ?? true) !== false;
         }
         if ($fallbacks) {
+            $routes[] = $local;
             $routes[] = ['label' => 'smtpout 465', 'host' => 'smtpout.secureserver.net', 'port' => 465, 'secure' => 'ssl', 'auth' => $auth];
             $routes[] = ['label' => 'smtpout 587', 'host' => 'smtpout.secureserver.net', 'port' => 587, 'secure' => 'tls', 'auth' => $auth];
         }
     }
-    if ($fallbacks) {
-        $routes[] = ['label' => 'localhost 25', 'host' => 'localhost', 'port' => 25, 'secure' => 'plain', 'auth' => null];
+    if ($config === null) {
+        $routes[] = $local;
     }
 
     // Try the route that worked last time first.
@@ -291,7 +297,7 @@ function smtp_send(array $route, string $encodedSubject, string $body, string $r
 
     $context = stream_context_create(['ssl' => ['verify_peer' => true, 'verify_peer_name' => true, 'peer_name' => $host]]);
     $scheme = $route['secure'] === 'ssl' ? 'ssl://' : 'tcp://';
-    $fp = @stream_socket_client($scheme . $host . ':' . $route['port'], $errno, $errstr, 8, STREAM_CLIENT_CONNECT, $context);
+    $fp = @stream_socket_client($scheme . $host . ':' . $route['port'], $errno, $errstr, 5, STREAM_CLIENT_CONNECT, $context);
     if (!$fp) {
         return [false, 'connect', trim($errstr . ' (' . $errno . ')')];
     }
