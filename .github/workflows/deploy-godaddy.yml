@@ -93,6 +93,12 @@ jobs:
           fi
           echo "Uploading ./out to '$TARGET'"
 
+          # Two passes so visitors never see a half-updated site. Pass 1 uploads
+          # the new stylesheets, scripts and images while the old pages keep
+          # pointing at the old ones (old files are never deleted). Pass 2 then
+          # swaps in the pages (.html, plus the .txt data Next.js loads when
+          # moving between pages), which reference files that already exist.
+          ftp_run "mirror --reverse --verbose --no-perms --parallel=4 --exclude-glob *.html --exclude-glob *.txt out/ '$TARGET'"
           ftp_run "mirror --reverse --verbose --no-perms --parallel=4 out/ '$TARGET'"
 
       - name: Upload skipped
